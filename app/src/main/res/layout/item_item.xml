@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.chauthai.swipereveallayout.SwipeRevealLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_slide_layout"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:padding="4dp"
+    app:dragEdge="right"
+    app:mode="same_level">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="100dp"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/ripple_green"
+            android:clickable="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/item_icon_add_to_cart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_smart_cart_white_transparent"
+                app:layout_constraintBottom_toTopOf="@+id/item_add_to_cart"
+                app:layout_constraintEnd_toEndOf="@+id/item_add_to_cart"
+                app:layout_constraintStart_toStartOf="@+id/item_add_to_cart"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <TextView
+                android:id="@+id/item_add_to_cart"
+                style="@style/Theme.SMart.Subheader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_add_to_cart"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_icon_add_to_cart" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+    <!-- Your secondary layout here -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/item_image"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="#757575"
+                android:scaleType="centerCrop"
+                android:src="@drawable/food_1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/item_name"
+                style="@style/Theme.SMart.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                app:layout_constraintEnd_toStartOf="@+id/item_price"
+                app:layout_constraintStart_toEndOf="@+id/item_image"
+                app:layout_constraintTop_toTopOf="@+id/item_image"
+                tools:text="Item Name" />
+
+            <TextView
+                android:id="@+id/item_category"
+                style="@style/Theme.SMart.Subheader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                app:layout_constraintStart_toEndOf="@+id/item_image"
+                app:layout_constraintTop_toBottomOf="@+id/item_name"
+                tools:text="Item Category" />
+
+            <ImageView
+                android:id="@+id/item_promotion_icon"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/ic_promotion"
+                app:layout_constraintBottom_toBottomOf="@+id/item_promotion"
+                app:layout_constraintLeft_toLeftOf="@+id/item_category"
+                app:layout_constraintTop_toTopOf="@id/item_promotion" />
+
+            <TextView
+                android:id="@+id/item_promotion"
+                style="@style/Theme.SMart.Subheader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:text="@string/title_promo"
+                android:textColor="@color/red"
+                app:layout_constraintStart_toEndOf="@+id/item_promotion_icon"
+                app:layout_constraintTop_toBottomOf="@+id/item_category" />
+
+            <TextView
+                android:id="@+id/item_price"
+                style="@style/Theme.SMart.Headline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/item_name"
+                tools:text="$$$" />
+
+            <TextView
+                android:id="@+id/item_old_price"
+                style="@style/Theme.SMart.Subheader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/red"
+                app:layout_constraintLeft_toLeftOf="@id/item_price"
+                app:layout_constraintRight_toRightOf="@id/item_price"
+                app:layout_constraintTop_toBottomOf="@id/item_price"
+                tools:text="$$$" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</com.chauthai.swipereveallayout.SwipeRevealLayout>
