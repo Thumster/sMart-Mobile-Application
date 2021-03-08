@@ -93,4 +93,37 @@
         <item name="android:layout_marginRight">4dp</item>
         <item name="android:textColor">@color/light_green</item>
     </style>
+
+    <style name="CustomWingInner">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">#FFFFFF</item>
+    </style>
+
+    <style name="CustomWingOuter">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
+    <style name="FirebaseUI.sMartTheme" parent="FirebaseUI">
+        <!-- Required for sign-in flow styling -->
+        <item name="colorPrimary">@color/light_green</item>
+        <item name="colorPrimaryDark">@color/dark_green</item>
+        <item name="colorAccent">@color/light_green_variant</item>
+
+        <item name="android:windowBackground">@drawable/gradient</item>
+        <item name="android:actionBarStyle">@style/FirebaseAuthActionBarStyle</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="FirebaseAuthActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/fui_transparent</item>
+    </style>
+    <style name="FirebaseUI.AuthMethodPicker.Logo">
+    </style>
+
 </resources>
