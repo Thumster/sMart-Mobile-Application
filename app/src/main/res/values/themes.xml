@@ -17,6 +17,24 @@
 <!--        <item name="android:windowFullscreen">true</item>-->
     </style>
 
+    <style name="SplashTheme" parent="Theme.SMart">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
+    <style name="Theme.SMart.PrimaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="iconGravity">textStart</item>
+        <item name="background">@color/dark_green</item>
+        <item name="backgroundTint">@color/dark_green</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Theme.SMart.SecondaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="iconGravity">textStart</item>
+        <item name="background">@color/light_green_variant</item>
+        <item name="backgroundTint">@color/light_green_variant</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="Theme.SMart.ChangeQuantityButton">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>

@@ -40,10 +40,6 @@ public class ItemsFragment extends Fragment implements
     private RecyclerView itemsRecycler;
     private ViewGroup emptyView;
 
-    private final String ITEM_COLLECTION_NAME = "items";
-    private final String CART_COLLECTION_NAME = "cart";
-
-    private FirebaseFirestore firestore;
     private Query query;
     private CollectionReference itemsColRef;
     private CollectionReference cartColRef;
@@ -55,9 +51,8 @@ public class ItemsFragment extends Fragment implements
         itemsRecycler = root.findViewById(R.id.recycler_items);
         emptyView = root.findViewById(R.id.view_empty);
 
-        firestore = FirebaseUtil.getFirestore();
-        itemsColRef = firestore.collection(ITEM_COLLECTION_NAME);
-        cartColRef = firestore.collection(CART_COLLECTION_NAME);
+        itemsColRef = FirebaseUtil.getItemsRef();
+        cartColRef = FirebaseUtil.getUserCartRef();
         query = itemsColRef;
         initRecyclerView(root);
 
@@ -66,7 +61,7 @@ public class ItemsFragment extends Fragment implements
 
     private void initRecyclerView(View view) {
         if (query == null) {
-            Log.w(TAG, "No query, not initializing items RecyclerView");
+            Log.i(TAG, "No query, not initializing items RecyclerView");
         }
         itemAdapter = new ItemAdapter(query, this) {
 
@@ -125,20 +120,20 @@ public class ItemsFragment extends Fragment implements
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Log.w(TAG, "DocumentSnapshot data: " + document.getData());
+                        Log.i(TAG, "DocumentSnapshot data: " + document.getData());
                         Toast.makeText(getContext(), "Item already added to cart", Toast.LENGTH_LONG).show();
                     } else {
                         docRef.set(new CartItem(itemSelected)).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Log.w(TAG, "Successful write to firestore");
+                                Log.i(TAG, "Successful write to firestore");
                                 Toast.makeText(getContext(), "Successfully added to cart", Toast.LENGTH_LONG).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing document", e);
+                                Log.i(TAG, "Error writing document", e);
                             }
                         });
                     }

@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,11 +41,10 @@ public class CartFragment extends Fragment implements
     private RecyclerView cartItemsRecycler;
     private ViewGroup summaryView;
     private TextView summaryPriceView;
+    private TextView summaryItemsNo;
     private ViewGroup emptyView;
+    private Button checkoutButton;
 
-    private final String CART_COLLECTION_NAME = "cart";
-
-    private FirebaseFirestore firestore;
     private Query query;
     private CollectionReference cartColRef;
 
@@ -55,10 +55,11 @@ public class CartFragment extends Fragment implements
         cartItemsRecycler = root.findViewById(R.id.recycler_cart);
         summaryView = root.findViewById(R.id.view_summary);
         summaryPriceView = root.findViewById(R.id.summary_price);
+        summaryItemsNo = root.findViewById(R.id.summary_items);
         emptyView = root.findViewById(R.id.view_empty);
+        checkoutButton = root.findViewById(R.id.button_checkout);
 
-        firestore = FirebaseUtil.getFirestore();
-        cartColRef = firestore.collection(CART_COLLECTION_NAME);
+        cartColRef = FirebaseUtil.getUserCartRef();
         query = cartColRef;
         initRecyclerView(root);
 
@@ -67,7 +68,7 @@ public class CartFragment extends Fragment implements
 
     private void initRecyclerView(View view) {
         if (query == null) {
-            Log.w(TAG, "No query, not initializing cart items RecyclerView");
+            Log.i(TAG, "No query, not initializing cart items RecyclerView");
         }
         cartItemAdaptor = new CartItemAdapter(query, this) {
 
@@ -83,6 +84,13 @@ public class CartFragment extends Fragment implements
                     summaryView.setVisibility(View.VISIBLE);
                     emptyView.setVisibility(View.GONE);
                     summaryPriceView.setText(String.format("$%.2f", cartItemAdaptor.getTotalPriceOfCart()));
+                    Integer noOfItems = cartItemAdaptor.getTotalItemsInCart();
+                    String noOfItemsText = "";
+                    if (noOfItems > 1) {
+                        summaryItemsNo.setText(String.format("%d Items", noOfItems));
+                    } else {
+                        summaryItemsNo.setText(String.format("%d Item", noOfItems));
+                    }
                 }
             }
 
@@ -125,14 +133,14 @@ public class CartFragment extends Fragment implements
         docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.w(TAG, "Successful delete from firestore");
+                Log.i(TAG, "Successful delete from firestore");
                 Toast.makeText(getContext(), "Successfully deleted from cart", Toast.LENGTH_LONG).show();
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
+                        Log.i(TAG, "Error deleting document", e);
                     }
                 });
         // Go to the details page for the selected restaurant
@@ -152,13 +160,13 @@ public class CartFragment extends Fragment implements
         docRef.set(itemSelected).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.w(TAG, "Successful update to firestore");
+                Log.i(TAG, "Successful update to firestore");
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
+                        Log.i(TAG, "Error updating document", e);
                     }
                 });
     }
@@ -173,13 +181,13 @@ public class CartFragment extends Fragment implements
         docRef.set(itemSelected).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.w(TAG, "Successful update to firestore");
+                Log.i(TAG, "Successful update to firestore");
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
+                        Log.i(TAG, "Error updating document", e);
                     }
                 });
     }

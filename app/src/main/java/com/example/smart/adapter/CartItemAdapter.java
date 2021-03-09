@@ -57,6 +57,19 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         return 0.0;
     }
 
+    public Integer getTotalItemsInCart() {
+        if (super.getItemCount() > 0) {
+            ArrayList<DocumentSnapshot> list = super.mSnapshots;
+            Integer sum = 0;
+            for (DocumentSnapshot snapshot: list) {
+                CartItem cartItem = snapshot.toObject(CartItem.class);
+                sum += cartItem.getQuantity();
+            }
+            return sum;
+        }
+        return 0;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
