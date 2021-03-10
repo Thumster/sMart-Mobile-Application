@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smart.MainActivity;
 import com.example.smart.R;
 import com.example.smart.adapter.ItemAdapter;
+import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -30,29 +31,21 @@ import com.google.firebase.firestore.Query;
 
 public class HomeFragment extends Fragment {
 
-    private HomeViewModel homeViewModel;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
-        final TextView textView = root.findViewById(R.id.text_home);
-        final Button buttonLogout = root.findViewById(R.id.button_logout);
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        TextView nameTextView = root.findViewById(R.id.text_name);
+        Button buttonLogout = root.findViewById(R.id.button_logout);
+        nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
         buttonLogout.setOnClickListener(v -> {
-            AuthUI.getInstance()
-                    .signOut(v.getContext())
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        public void onComplete(Task<Void> task) {
-                            ((MainActivity)v.getContext()).recreate();
-                        }
-                    });
+                    AuthUI.getInstance()
+                            .signOut(v.getContext())
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                public void onComplete(Task<Void> task) {
+                                    ((MainActivity) v.getContext()).recreate();
+                                }
+                            });
                 }
 
         );

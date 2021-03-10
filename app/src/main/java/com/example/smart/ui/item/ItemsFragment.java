@@ -119,24 +119,26 @@ public class ItemsFragment extends Fragment implements
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
+                    CartItem cartItem;
                     if (document.exists()) {
-                        Log.i(TAG, "DocumentSnapshot data: " + document.getData());
-                        Toast.makeText(getContext(), "Item already added to cart", Toast.LENGTH_LONG).show();
+                        cartItem = document.toObject(CartItem.class);
+                        cartItem.setQuantity(cartItem.getQuantity() + 1);
                     } else {
-                        docRef.set(new CartItem(itemSelected)).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.i(TAG, "Successful write to firestore");
-                                Toast.makeText(getContext(), "Successfully added to cart", Toast.LENGTH_LONG).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.i(TAG, "Error writing document", e);
-                            }
-                        });
+                        cartItem = new CartItem(itemSelected);
                     }
+                    docRef.set(cartItem).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.i(TAG, "Successful write to firestore");
+                            Toast.makeText(getContext(), "Successfully added to cart", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.i(TAG, "Error writing document", e);
+                                }
+                            });
                 } else {
                     Log.e(TAG, "firestore get failed with ", task.getException());
                 }

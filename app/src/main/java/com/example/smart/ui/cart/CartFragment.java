@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +46,7 @@ public class CartFragment extends Fragment implements
     private TextView summaryItemsNo;
     private ViewGroup emptyView;
     private Button checkoutButton;
+    private Button redirectButton;
 
     private Query query;
     private CollectionReference cartColRef;
@@ -58,6 +61,7 @@ public class CartFragment extends Fragment implements
         summaryItemsNo = root.findViewById(R.id.summary_items);
         emptyView = root.findViewById(R.id.view_empty);
         checkoutButton = root.findViewById(R.id.button_checkout);
+        redirectButton = root.findViewById(R.id.button_redirect_items);
 
         cartColRef = FirebaseUtil.getUserCartRef();
         query = cartColRef;
@@ -79,10 +83,20 @@ public class CartFragment extends Fragment implements
                     cartItemsRecycler.setVisibility(View.GONE);
                     summaryView.setVisibility(View.GONE);
                     emptyView.setVisibility(View.VISIBLE);
+                    checkoutButton.setVisibility(View.GONE);
+
+                    redirectButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            NavController navController = Navigation.findNavController(v);
+                            Navigation.findNavController(view).navigate(R.id.navigation_items);
+                        }
+                    });
                 } else {
                     cartItemsRecycler.setVisibility(View.VISIBLE);
                     summaryView.setVisibility(View.VISIBLE);
                     emptyView.setVisibility(View.GONE);
+                    checkoutButton.setVisibility(View.VISIBLE);
                     summaryPriceView.setText(String.format("$%.2f", cartItemAdaptor.getTotalPriceOfCart()));
                     Integer noOfItems = cartItemAdaptor.getTotalItemsInCart();
                     String noOfItemsText = "";
@@ -130,19 +144,37 @@ public class CartFragment extends Fragment implements
         CartItem itemSelected = item.toObject(CartItem.class);
         String itemId = itemSelected.getId().getId();
         DocumentReference docRef = cartColRef.document(itemId);
-        docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.i(TAG, "Successful delete from firestore");
-                Toast.makeText(getContext(), "Successfully deleted from cart", Toast.LENGTH_LONG).show();
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i(TAG, "Error deleting document", e);
-                    }
-                });
+
+        if (itemSelected.getQuantityInCart() > 0) {
+            itemSelected.setQuantity(itemSelected.getQuantityInCart());
+            docRef.set(itemSelected).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.i(TAG, "Successful write to firestore");
+                    Toast.makeText(getContext(), "Item detected in cart, only deleted excess", Toast.LENGTH_LONG).show();
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i(TAG, "Error writing document", e);
+                        }
+                    });
+        } else {
+            docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.i(TAG, "Successful delete from firestore");
+                    Toast.makeText(getContext(), "Successfully deleted from cart", Toast.LENGTH_LONG).show();
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i(TAG, "Error deleting document", e);
+                        }
+                    });
+        }
         // Go to the details page for the selected restaurant
 //        Intent intent = new Intent(this, ItemDetailActivity.class);
 //        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, item.getId());

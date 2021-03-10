@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.chauthai.swipereveallayout.SwipeRevealLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/item_slide_layout"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:padding="4dp"
-    app:dragEdge="right"
-    app:mode="same_level">
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:paddingLeft="4dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="100dp"
-        android:layout_height="match_parent">
+    <com.chauthai.swipereveallayout.SwipeRevealLayout
+        android:id="@+id/item_slide_layout"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        app:dragEdge="right"
+        app:mode="same_level">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/item_menu"
-            android:layout_width="match_parent"
+            android:layout_width="110dp"
             android:layout_height="match_parent"
             android:background="@drawable/ripple_green"
             android:clickable="true"
@@ -41,21 +41,16 @@
                 android:text="@string/button_add_to_cart"
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/item_icon_add_to_cart" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-    <!-- Your secondary layout here -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
+        <!-- Your secondary layout here -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/item_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/item_image"
@@ -64,6 +59,7 @@
                 android:background="#757575"
                 android:scaleType="centerCrop"
                 android:src="@drawable/food_1"
+                app:layout_constraintVertical_bias="0.3"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -132,5 +128,6 @@
                 app:layout_constraintTop_toBottomOf="@id/item_price"
                 tools:text="$$$" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-</com.chauthai.swipereveallayout.SwipeRevealLayout>
+
+    </com.chauthai.swipereveallayout.SwipeRevealLayout>
+</com.google.android.material.card.MaterialCardView>
