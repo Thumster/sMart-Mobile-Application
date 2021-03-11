@@ -1,5 +1,7 @@
 package com.example.smart.ui.item;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,11 +11,13 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.smart.ItemDialogFragment;
 import com.example.smart.R;
 import com.example.smart.adapter.ItemAdapter;
 import com.example.smart.model.CartItem;
@@ -32,7 +36,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 public class ItemsFragment extends Fragment implements
-        ItemAdapter.OnItemSelectedListener {
+        ItemAdapter.OnItemSelectedListener, ItemDialogFragment.ItemDialogListener {
 
     private static final String TAG = "ITEMS_FRAGMENT";
 
@@ -111,6 +115,13 @@ public class ItemsFragment extends Fragment implements
     @Override
     public void onItemSelected(DocumentSnapshot item) {
         Item itemSelected = item.toObject(Item.class);
+        DialogFragment itemDialog = new ItemDialogFragment(this, itemSelected);
+        itemDialog.show(getFragmentManager(), "test");
+    }
+
+    @Override
+    public void onItemAdded(DocumentSnapshot item) {
+        Item itemSelected = item.toObject(Item.class);
         String itemId = itemSelected.getId().getId();
 
         DocumentReference docRef = cartColRef.document(itemId);
@@ -144,11 +155,42 @@ public class ItemsFragment extends Fragment implements
                 }
             }
         });
-        // Go to the details page for the selected restaurant
-//        Intent intent = new Intent(this, ItemDetailActivity.class);
-//        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, item.getId());
-//
-//        startActivity(intent);
+    }
+
+    @Override
+    public void onDialogConfirmAdd(Item item, Integer quantity) {
+        DocumentReference docRef = cartColRef.document(item.getId().getId());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    CartItem cartItem;
+                    if (document.exists()) {
+                        cartItem = document.toObject(CartItem.class);
+                        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+                    } else {
+                        cartItem = new CartItem(item);
+                        cartItem.setQuantity(quantity);
+                    }
+                    docRef.set(cartItem).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.i(TAG, "Successful write to firestore");
+                            Toast.makeText(getContext(), "Successfully added to cart", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.i(TAG, "Error writing document", e);
+                                }
+                            });
+                } else {
+                    Log.e(TAG, "firestore get failed with ", task.getException());
+                }
+            }
+        });
     }
 
 }

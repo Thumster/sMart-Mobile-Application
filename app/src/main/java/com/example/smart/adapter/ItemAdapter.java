@@ -30,6 +30,7 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
     public interface OnItemSelectedListener {
 
         void onItemSelected(DocumentSnapshot item);
+        void onItemAdded(DocumentSnapshot item);
 
     }
 
@@ -58,6 +59,7 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        ConstraintLayout itemLayout;
         ConstraintLayout addToCartLayout;
         SwipeRevealLayout swipeRevealLayout;
         ImageView imageView;
@@ -70,6 +72,7 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
 
         public ViewHolder(View itemView) {
             super(itemView);
+            itemLayout = itemView.findViewById(R.id.item_layout);
             addToCartLayout = itemView.findViewById(R.id.item_menu);
             swipeRevealLayout = itemView.findViewById(R.id.item_slide_layout);
             imageView = itemView.findViewById(R.id.item_image);
@@ -96,7 +99,7 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
             nameView.setText(item.getName());
             categoryView.setText(item.getCategory());
             priceView.setText(String.format("$%.2f", item.getPrice()));
-            if (item.getOldPrice().equals(null) || item.getOldPrice() != 0.0) {
+            if (item.getOldPrice() != 0.0) {
                 oldPriceView.setText(String.format("$%.2f", item.getOldPrice()));
                 oldPriceView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
@@ -106,19 +109,19 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
             }
 
             // Click listener
-            itemView.setOnClickListener(new View.OnClickListener() {
+            itemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    if (listener != null) {
-//                        listener.onItemSelected(snapshot);
-//                    }
+                    if (listener != null) {
+                        listener.onItemSelected(snapshot);
+                    }
                 }
             });
             addToCartLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (listener != null) {
-                        listener.onItemSelected(snapshot);
+                        listener.onItemAdded(snapshot);
                         swipeRevealLayout.close(true);
                     }
                 }

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/item_close"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:clickable="true"
+            android:src="@drawable/ic_close"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/item_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="40dp"
+            android:background="#757575"
+            android:scaleType="centerCrop"
+            android:src="@drawable/food_1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_name"
+            style="@style/Theme.SMart.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textAlignment="center"
+            android:textSize="25dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_image"
+            tools:text="Item Name" />
+
+        <TextView
+            android:id="@+id/item_category"
+            style="@style/Theme.SMart.Subheader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_name"
+            tools:text="Item Category" />
+
+        <ImageView
+            android:id="@+id/item_promotion_icon"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_promotion"
+            app:layout_constraintEnd_toStartOf="@id/item_promotion"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_category" />
+
+        <TextView
+            android:id="@+id/item_promotion"
+            style="@style/Theme.SMart.Subheader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:text="@string/title_promo"
+            android:textColor="@color/red"
+            app:layout_constraintBottom_toBottomOf="@id/item_promotion_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_promotion_icon"
+            app:layout_constraintTop_toTopOf="@id/item_promotion_icon" />
+
+        <TextView
+            android:id="@+id/item_price"
+            style="@style/Theme.SMart.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="5dp"
+            app:layout_constraintEnd_toStartOf="@id/item_old_price"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_promotion_icon"
+            tools:text="$$$" />
+
+        <TextView
+            android:id="@+id/item_old_price"
+            style="@style/Theme.SMart.Subheader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"
+            app:layout_constraintBottom_toBottomOf="@id/item_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_price"
+            app:layout_constraintTop_toTopOf="@id/item_price"
+            tools:text="$$$" />
+
+        <Button
+            android:id="@+id/item_button_minus"
+            style="@style/Theme.SMart.ChangeQuantityButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:text="-"
+            android:textSize="30dp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_button_plus"
+            app:layout_constraintEnd_toStartOf="@+id/item_quantity"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_button_plus" />
+
+        <TextView
+            android:id="@+id/item_quantity"
+            style="@style/Theme.SMart.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:background="@drawable/textview_border"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="70dp"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_button_plus"
+            app:layout_constraintEnd_toStartOf="@+id/item_button_plus"
+            app:layout_constraintStart_toEndOf="@id/item_button_minus"
+            app:layout_constraintTop_toTopOf="@id/item_button_plus"
+            tools:text="no." />
+
+        <Button
+            android:id="@+id/item_button_plus"
+            style="@style/Theme.SMart.ChangeQuantityButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:text="+"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_quantity"
+            app:layout_constraintTop_toBottomOf="@id/item_price" />
+
+        <TextView
+            android:id="@+id/item_total_price"
+            style="@style/Theme.SMart.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:textSize="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_button_plus"
+            tools:text="$$$$$$" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_add_to_cart"
+            style="@style/Theme.SMart.SecondaryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:clickable="true"
+            android:text="@string/button_add_to_cart"
+            app:icon="@drawable/ic_smart_cart_white_transparent"
+            app:iconSize="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_total_price"
+            tools:layout_editor_absoluteX="10dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</com.google.android.material.card.MaterialCardView>
