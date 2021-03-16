@@ -18,19 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smart.R;
 import com.example.smart.adapter.CartItemAdapter;
-import com.example.smart.adapter.ItemAdapter;
 import com.example.smart.model.CartItem;
-import com.example.smart.model.Item;
 import com.example.smart.util.FirebaseUtil;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
@@ -63,7 +58,7 @@ public class CartFragment extends Fragment implements
         checkoutButton = root.findViewById(R.id.button_checkout);
         redirectButton = root.findViewById(R.id.button_redirect_items);
 
-        cartColRef = FirebaseUtil.getUserCartRef();
+        cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = cartColRef;
         initRecyclerView(root);
 
@@ -83,7 +78,6 @@ public class CartFragment extends Fragment implements
                     cartItemsRecycler.setVisibility(View.GONE);
                     summaryView.setVisibility(View.GONE);
                     emptyView.setVisibility(View.VISIBLE);
-                    checkoutButton.setVisibility(View.GONE);
 
                     redirectButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -96,7 +90,7 @@ public class CartFragment extends Fragment implements
                     cartItemsRecycler.setVisibility(View.VISIBLE);
                     summaryView.setVisibility(View.VISIBLE);
                     emptyView.setVisibility(View.GONE);
-                    checkoutButton.setVisibility(View.VISIBLE);
+
                     summaryPriceView.setText(String.format("$%.2f", cartItemAdaptor.getTotalPriceOfCart()));
                     Integer noOfItems = cartItemAdaptor.getTotalItemsInCart();
                     String noOfItemsText = "";

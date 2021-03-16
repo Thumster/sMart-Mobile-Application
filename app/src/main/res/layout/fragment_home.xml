@@ -1,42 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/text_welcome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Theme.SMart.Title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/text_name"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0.2"
-        android:textAlignment="center"
-        android:text="@string/title_welcome"/>
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/text_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Theme.SMart.Headline"
-        android:layout_marginTop="5dp"
-        app:layout_constraintStart_toStartOf="@id/text_welcome"
-        app:layout_constraintEnd_toEndOf="@id/text_welcome"
-        app:layout_constraintTop_toBottomOf="@id/text_welcome"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:textAlignment="center"
-        tools:text="Name of User"/>
 
-    <Button
-        android:id="@+id/button_logout"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_anchor="@+id/fab_qr_code"
+        app:layout_anchorGravity="center">
+
+        <Button
+            android:id="@+id/button_logout"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_logout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_welcome"
+            style="@style/Theme.SMart.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:text="@string/title_welcome"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toTopOf="@+id/text_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_name"
+            style="@style/Theme.SMart.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@id/text_welcome"
+            app:layout_constraintStart_toStartOf="@id/text_welcome"
+            app:layout_constraintTop_toBottomOf="@id/text_welcome"
+            tools:text="Name of User" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_user_cart"
+            style="@style/Theme.SMart.Subheader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:textAlignment="center"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/button_unregister_cart"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="ID of Cart" />
+
+        <Button
+            android:id="@+id/button_unregister_cart"
+            style="@style/Theme.SMart.SecondaryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Unregister cart"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_user_cart" />
+
+        <!--        <EditText-->
+        <!--            android:id="@+id/text_cart_id"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:hint="ENTER ID OF CART HERE"-->
+        <!--            app:layout_constraintBottom_toTopOf="@+id/button_scan" />-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/button_scan"-->
+        <!--            style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="TEST SCAN CART"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent" />-->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_qr_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_logout"
-        app:layout_constraintEnd_toEndOf="parent"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:text="@string/button_scan_basket"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:visibility="gone"
+        app:icon="@drawable/ic_qr_code"
+        app:iconPadding="20dp"
+        app:iconSize="40dp"
+        app:iconTint="@color/white"
+        app:rippleColor="@color/dark_green" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

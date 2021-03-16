@@ -12,6 +12,10 @@
     <string name="button_redirect_shop">Shop Now</string>
     <string name="title_welcome">Welcome back</string>
     <string name="button_logout">logout</string>
+    <string name="button_scan_basket">Scan Basket</string>
+    <string name="title_qr_code">Scan QR Code</string>
+    <string name="subtitle_qr_code">Hold your camera to scan a QR Code of a sMart basket.
+         Please ensure it is an valid and unused basket.</string>
 
     <string name="title_activity_login">Login</string>
     <string name="title_login_provider">choose a provider</string>
@@ -21,4 +25,6 @@
     <string name="facebook_application_id" translatable="false">159501769349383</string>
     <!-- Facebook Application ID, prefixed by 'fb'. Enables Chrome Custom tabs. -->
     <string name="facebook_login_protocol_scheme" translatable="false">fb159501769349383</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

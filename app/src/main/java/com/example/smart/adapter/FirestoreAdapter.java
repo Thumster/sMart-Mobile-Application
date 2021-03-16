@@ -61,9 +61,6 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
     @Override
     public void onEvent(QuerySnapshot documentSnapshots,
                         FirebaseFirestoreException e) {
-
-        // ...
-
         // Dispatch the event
         for (DocumentChange change : documentSnapshots.getDocumentChanges()) {
             // Snapshot of the changed document
@@ -119,8 +116,6 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onError(FirebaseFirestoreException e) {
     }
-
-    ;
 
     protected void onDataChanged() {
     }

@@ -12,9 +12,9 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-<!--        <item name="windowActionBar">false</item>-->
-<!--        <item name="windowNoTitle">true</item>-->
-<!--        <item name="android:windowFullscreen">true</item>-->
+        <!--        <item name="windowActionBar">false</item>-->
+        <!--        <item name="windowNoTitle">true</item>-->
+        <!--        <item name="android:windowFullscreen">true</item>-->
     </style>
 
     <style name="SplashTheme" parent="Theme.SMart">
@@ -147,6 +147,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
     <style name="FirebaseUI.EditText">
         <item name="android:paddingBottom">14dp</item>
         <item name="android:paddingTop">14dp</item>
@@ -170,5 +171,9 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="Theme.SMart.FullScreenDialog">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
 
 </resources>

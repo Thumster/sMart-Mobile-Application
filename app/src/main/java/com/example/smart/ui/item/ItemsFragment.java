@@ -1,8 +1,5 @@
 package com.example.smart.ui.item;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,11 +10,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.smart.ItemDialogFragment;
 import com.example.smart.R;
 import com.example.smart.adapter.ItemAdapter;
 import com.example.smart.model.CartItem;
@@ -31,7 +26,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
@@ -56,7 +50,7 @@ public class ItemsFragment extends Fragment implements
         emptyView = root.findViewById(R.id.view_empty);
 
         itemsColRef = FirebaseUtil.getItemsRef();
-        cartColRef = FirebaseUtil.getUserCartRef();
+        cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = itemsColRef;
         initRecyclerView(root);
 
@@ -116,7 +110,7 @@ public class ItemsFragment extends Fragment implements
     public void onItemSelected(DocumentSnapshot item) {
         Item itemSelected = item.toObject(Item.class);
         DialogFragment itemDialog = new ItemDialogFragment(this, itemSelected);
-        itemDialog.show(getFragmentManager(), "test");
+        itemDialog.show(getFragmentManager(), TAG);
     }
 
     @Override

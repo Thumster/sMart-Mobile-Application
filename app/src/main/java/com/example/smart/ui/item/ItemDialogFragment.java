@@ -1,8 +1,7 @@
-package com.example.smart;
+package com.example.smart.ui.item;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
@@ -13,12 +12,8 @@ import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
-import com.example.smart.adapter.ItemAdapter;
+import com.example.smart.R;
 import com.example.smart.model.Item;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.Query;
-
-import org.w3c.dom.Text;
 
 public class ItemDialogFragment extends DialogFragment {
     public interface ItemDialogListener {
