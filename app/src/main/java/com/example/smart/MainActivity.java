@@ -1,12 +1,17 @@
 package com.example.smart;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.smart.ui.home.HomeFragment;
@@ -16,6 +21,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -50,10 +57,55 @@ public class MainActivity extends AppCompatActivity
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
             NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
             NavigationUI.setupWithNavController(navView, navController);
+
+            //Testing notis
+            // initialise the channel with channelId: "CHANNEL_ID"
+            createNotificationChannel();
+
+            Button buttonShowNotification = findViewById(R.id.show);
+
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            // flags to associate what to do with an activity
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //if the pending intent alr exists, keep it but replace extra data with what is in the new intent
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // Create a noti builder with the channel id + set params of notification (content intent supplies intent, auto cancel means noti is cancelled once clicked)
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
+                    .setSmallIcon(R.drawable.ic_baseline_notifications_24)
+                    .setContentTitle("textTitle")
+                    .setContentText("textContent")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true);
+
+            // create a manager to perform tasks
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+            //listen on sth and use lambda expression to create a new view
+            buttonShowNotification.setOnClickListener(view -> {
+                notificationManager.notify(100, builder.build());
+            });
         } else {
             Intent loginPage = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(loginPage);
             finish();
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "myChannel";
+            String description = "Channel for notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
