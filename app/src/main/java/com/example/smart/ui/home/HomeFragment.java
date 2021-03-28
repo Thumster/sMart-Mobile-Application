@@ -42,8 +42,6 @@ public class HomeFragment extends Fragment
     TextView userCartTextView;
     Button buttonLogout;
     Button buttonUnregisterCart;
-    //    Button buttonScan;
-//    EditText editTextCartId;
     Button buttonQrCode;
 
 
@@ -53,8 +51,6 @@ public class HomeFragment extends Fragment
 
         nameTextView = root.findViewById(R.id.text_name);
         buttonLogout = root.findViewById(R.id.button_logout);
-//        buttonScan = root.findViewById(R.id.button_scan);
-//        editTextCartId = root.findViewById(R.id.text_cart_id);
         buttonUnregisterCart = root.findViewById(R.id.button_unregister_cart);
         userCartTextView = root.findViewById(R.id.text_user_cart);
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
@@ -71,15 +67,8 @@ public class HomeFragment extends Fragment
                 }
 
         );
-//        FirebaseUtil.initCart(this);
         FirebaseUtil.startListening(this);
         onCartFound(FirebaseUtil.getCurrentUserCartId() != null);
-//        buttonScan.setOnClickListener(v -> {
-//            String id = editTextCartId.getText().toString();
-////            if (id != null) {
-////                scanCart(id);
-////            }
-//        });
         buttonUnregisterCart.setOnClickListener(v -> {
             unregisterCart();
         });

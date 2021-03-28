@@ -16,6 +16,8 @@
     <string name="title_qr_code">Scan QR Code</string>
     <string name="subtitle_qr_code">Hold your camera to scan a QR Code of a sMart basket.
          Please ensure it is an valid and unused basket.</string>
+    <string name="dialog_confirm_button">Confirm</string>
+    <string name="dialog_cancel_button">Cancel</string>
 
     <string name="title_activity_login">Login</string>
     <string name="title_login_provider">choose a provider</string>

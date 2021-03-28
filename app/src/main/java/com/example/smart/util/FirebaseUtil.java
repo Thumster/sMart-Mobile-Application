@@ -32,6 +32,7 @@ public class FirebaseUtil {
     public static final String CART_COLLECTION_NAME = "carts";
     public static final String CART_USER_DOC_NAME = "user";
     public static final String USER_CART_ITEMS_COLLECTION_NAME = "cartItems";
+    public static final String USER_TRANSACTIONS_COLLECTION_NAME = "transactions";
 
     private static Boolean isCurrentlyShopping = false;
     private static String currentUserCartId;
@@ -166,6 +167,10 @@ public class FirebaseUtil {
 
     public static CollectionReference getUserCartItemsRef() {
         return getFirestore().collection(USER_COLLECTION_NAME).document(getCurrentUserUid()).collection(USER_CART_ITEMS_COLLECTION_NAME);
+    }
+
+    public static CollectionReference getUserTransactionsRef() {
+        return getFirestore().collection(USER_COLLECTION_NAME).document(getCurrentUserUid()).collection(USER_TRANSACTIONS_COLLECTION_NAME);
     }
 
 }

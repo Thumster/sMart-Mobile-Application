@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,12 +23,15 @@ import com.example.smart.model.CartItem;
 import com.example.smart.util.FirebaseUtil;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
+
+import java.util.List;
 
 public class CartFragment extends Fragment implements
         CartItemAdapter.OnItemSelectedListener {
@@ -43,6 +47,10 @@ public class CartFragment extends Fragment implements
     private Button checkoutButton;
     private Button redirectButton;
 
+    private TextView inShopSummaryPriceView;
+    private TextView inShopSummaryItemsNo;
+    private ImageView inShopIcon;
+
     private Query query;
     private CollectionReference cartColRef;
 
@@ -57,6 +65,10 @@ public class CartFragment extends Fragment implements
         emptyView = root.findViewById(R.id.view_empty);
         checkoutButton = root.findViewById(R.id.button_checkout);
         redirectButton = root.findViewById(R.id.button_redirect_items);
+
+        inShopSummaryPriceView = root.findViewById(R.id.in_shop_summary_price);
+        inShopSummaryItemsNo = root.findViewById(R.id.in_shop_summary_items);
+        inShopIcon = root.findViewById(R.id.in_shop_icon_cart);
 
         cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = cartColRef;
@@ -91,20 +103,73 @@ public class CartFragment extends Fragment implements
                     summaryView.setVisibility(View.VISIBLE);
                     emptyView.setVisibility(View.GONE);
 
+                    String physicalCartTotalPrice = String.format("$%.2f", cartItemAdaptor.getTotalPriceOfPhysicalCart());
+                    Integer physicalCartTotalItems = cartItemAdaptor.getTotalItemsInPhysicalCart();
+                    if (FirebaseUtil.getIsCurrentlyShopping()) {
+                        checkoutButton.setVisibility(View.VISIBLE);
+                        inShopSummaryItemsNo.setVisibility(View.VISIBLE);
+                        inShopSummaryPriceView.setVisibility(View.VISIBLE);
+                        inShopIcon.setVisibility(View.VISIBLE);
+
+                        inShopSummaryPriceView.setText(physicalCartTotalPrice);
+                        inShopSummaryItemsNo.setText(String.format("%d", physicalCartTotalItems));
+                    } else {
+                        checkoutButton.setVisibility(View.GONE);
+                        inShopSummaryItemsNo.setVisibility(View.GONE);
+                        inShopSummaryPriceView.setVisibility(View.GONE);
+                        inShopIcon.setVisibility(View.GONE);
+                    }
+
                     summaryPriceView.setText(String.format("$%.2f", cartItemAdaptor.getTotalPriceOfCart()));
                     Integer noOfItems = cartItemAdaptor.getTotalItemsInCart();
-                    String noOfItemsText = "";
                     if (noOfItems > 1) {
                         summaryItemsNo.setText(String.format("%d Items", noOfItems));
                     } else {
                         summaryItemsNo.setText(String.format("%d Item", noOfItems));
                     }
+
+                    Integer noOfItemsInPhysicalCart = cartItemAdaptor.getTotalItemsInPhysicalCart();
+
+                    checkoutButton.setOnClickListener(v -> {
+                        if (noOfItemsInPhysicalCart > 0) {
+                            Query query = cartColRef.whereGreaterThan("quantityInCart", 0);
+                            CheckoutDialogFragment checkoutDialog = new CheckoutDialogFragment(new CheckoutDialogFragment.CheckoutDialogListener() {
+                                @Override
+                                public void onCheckout(List<CartItem> purchasedCartItems) {
+                                    cartColRef.get().addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
+                                            for (DocumentSnapshot snapshot : snapshots) {
+                                                CartItem cartItem = snapshot.toObject(CartItem.class);
+                                                purchasedCartItems.stream()
+                                                        .filter(item -> item.getId().equals(cartItem.getId()))
+                                                        .findFirst()
+                                                        .ifPresent(foundItem -> {
+                                                            Integer newQuantity = cartItem.getQuantity() - foundItem.getQuantityInCart();
+                                                            if (newQuantity > 0) {
+                                                                cartItem.setQuantity(newQuantity);
+                                                                cartItem.setQuantityInCart(0);
+                                                                snapshot.getReference().set(cartItem);
+                                                            } else {
+                                                                snapshot.getReference().delete();
+                                                            }
+                                                        });
+                                            }
+                                        }
+                                    });
+                                }
+                            }, query);
+                            checkoutDialog.show(getFragmentManager(), TAG);
+                        } else {
+                            Toast.makeText(getContext(), "No items detected in physical cart!", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
 
             @Override
             protected void onError(FirebaseFirestoreException e) {
-//                // Show a snackbar on errors
+                // Show a snackbar on errors
                 Snackbar.make(view.findViewById(android.R.id.content),
                         "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
             }
@@ -118,8 +183,6 @@ public class CartFragment extends Fragment implements
     @Override
     public void onStart() {
         super.onStart();
-
-        // Start listening for Firestore updates
         if (cartItemAdaptor != null) {
             cartItemAdaptor.startListening();
         }
@@ -139,6 +202,10 @@ public class CartFragment extends Fragment implements
         String itemId = itemSelected.getId().getId();
         DocumentReference docRef = cartColRef.document(itemId);
 
+        if (itemSelected.getQuantityInCart() > 0) {
+            Toast.makeText(getContext(), "Item in cart. Unable to delete!", Toast.LENGTH_LONG).show();
+            return;
+        }
         if (itemSelected.getQuantityInCart() > 0) {
             itemSelected.setQuantity(itemSelected.getQuantityInCart());
             docRef.set(itemSelected).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -169,11 +236,6 @@ public class CartFragment extends Fragment implements
                         }
                     });
         }
-        // Go to the details page for the selected restaurant
-//        Intent intent = new Intent(this, ItemDetailActivity.class);
-//        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, item.getId());
-//
-//        startActivity(intent);
     }
 
     @Override
