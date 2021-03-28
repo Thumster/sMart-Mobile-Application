@@ -3,6 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_items">Items</string>
     <string name="title_cart">Cart</string>
+    <string name="title_transactions">Transactions</string>
     <string name="home_button_text">Test Button</string>
     <string name="no_results">No items found</string>
     <string name="title_promo">Promotion</string>

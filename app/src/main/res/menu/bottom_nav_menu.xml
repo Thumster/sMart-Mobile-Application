@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_smart_cart_black_transparent"
         android:title="@string/title_cart" />
 
+    <item
+        android:id="@+id/navigation_transactions"
+        android:icon="@drawable/ic_transactions_24dp"
+        android:title="@string/title_transactions" />
+
 </menu>
