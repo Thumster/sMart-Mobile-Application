@@ -9,8 +9,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_cart"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="100dp"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@+id/view_summary"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/recycler_cart"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
@@ -27,9 +28,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
-            android:textColor="@color/dark_green"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/button_checkout"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/in_shop_summary_items"
             tools:text="5 items" />
 
         <TextView
@@ -39,18 +40,20 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
             android:text="Total:"
-            app:layout_constraintBottom_toBottomOf="@+id/summary_price"
+            app:layout_constraintBottom_toBottomOf="@+id/summary_items"
             app:layout_constraintEnd_toStartOf="@+id/summary_price"
-            app:layout_constraintTop_toTopOf="@+id/summary_price" />
+            app:layout_constraintTop_toTopOf="@+id/summary_items" />
 
         <TextView
             android:id="@+id/summary_price"
             style="@style/Theme.SMart.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/summary_price_title"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/summary_price_title"
             tools:text="$$$$$$" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_checkout"
             style="@style/Theme.SMart.SecondaryButton"
@@ -60,9 +63,48 @@
             android:text="@string/button_checkout"
             app:icon="@drawable/ic_smart_cart_white_transparent"
             app:iconSize="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/summary_items"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout_editor_absoluteX="162dp" />
+
+        <ImageView
+            android:id="@+id/in_shop_icon_cart"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="1dp"
+            android:src="@drawable/ic_smart_cart_green_transparent"
+            app:layout_constraintBottom_toBottomOf="@+id/in_shop_summary_items"
+            app:layout_constraintEnd_toStartOf="@id/in_shop_summary_items"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/in_shop_summary_items" />
+
+        <TextView
+            android:id="@+id/in_shop_summary_items"
+            style="@style/Theme.SMart.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintVertical_chainStyle="packed"
+            android:textColor="@color/dark_green"
+            app:layout_constraintBottom_toTopOf="@id/summary_items"
+            app:layout_constraintStart_toEndOf="@id/in_shop_icon_cart"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="100" />
+
+        <TextView
+            android:id="@+id/in_shop_summary_price"
+            style="@style/Theme.SMart.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dark_green"
+            app:layout_constraintBottom_toBottomOf="@+id/in_shop_summary_items"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/in_shop_summary_items"
+            tools:text="$$$$$$" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/view_empty"
         android:layout_width="wrap_content"

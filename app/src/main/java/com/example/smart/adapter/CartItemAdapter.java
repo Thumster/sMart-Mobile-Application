@@ -1,6 +1,8 @@
 package com.example.smart.adapter;
 
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,6 +21,7 @@ import com.chauthai.swipereveallayout.ViewBinderHelper;
 import com.example.smart.R;
 import com.example.smart.model.CartItem;
 import com.example.smart.model.Item;
+import com.example.smart.util.FirebaseUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
@@ -70,6 +74,32 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         return 0;
     }
 
+    public Double getTotalPriceOfPhysicalCart() {
+        if (super.getItemCount() > 0) {
+            ArrayList<DocumentSnapshot> list = super.mSnapshots;
+            Double sum = 0.0;
+            for (DocumentSnapshot snapshot: list) {
+                CartItem cartItem = snapshot.toObject(CartItem.class);
+                sum += cartItem.getPrice() * cartItem.getQuantityInCart();
+            }
+            return sum;
+        }
+        return 0.0;
+    }
+
+    public Integer getTotalItemsInPhysicalCart() {
+        if (super.getItemCount() > 0) {
+            ArrayList<DocumentSnapshot> list = super.mSnapshots;
+            Integer sum = 0;
+            for (DocumentSnapshot snapshot: list) {
+                CartItem cartItem = snapshot.toObject(CartItem.class);
+                sum += cartItem.getQuantityInCart();
+            }
+            return sum;
+        }
+        return 0;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -99,6 +129,11 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         Button addButton;
         Button minusButton;
 
+        View inShopLayout;
+        ImageView inShopIcon;
+        TextView inShopQuantityView;
+        TextView inShopPriceView;
+
         public ViewHolder(View itemView) {
             super(itemView);
             deleteLayout = itemView.findViewById(R.id.item_menu);
@@ -113,6 +148,10 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
             addButton = itemView.findViewById(R.id.item_button_plus);
             minusButton = itemView.findViewById(R.id.item_button_minus);
 
+            inShopLayout = itemView.findViewById(R.id.in_shop_layout);
+            inShopIcon = itemView.findViewById(R.id.in_shop_icon_cart);
+            inShopQuantityView = itemView.findViewById(R.id.in_shop_quantity);
+            inShopPriceView = itemView.findViewById(R.id.in_shop_price);
         }
 
         public void bind(final DocumentSnapshot snapshot,
@@ -136,6 +175,26 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
                 minusButton.setEnabled(false);
             } else {
                 minusButton.setEnabled(true);
+            }
+
+            if (FirebaseUtil.getIsCurrentlyShopping()) {
+                inShopLayout.setVisibility(View.VISIBLE);
+                inShopQuantityView.setText(item.getQuantityInCart().toString());
+                inShopPriceView.setText(String.format("$%.2f",item.getQuantityInCart() * item.getPrice()));
+                totalPriceView.setTextAppearance(R.style.Theme_SMart_Subheader);
+                totalPriceView.setTypeface(null, Typeface.BOLD);
+
+                if (item.getQuantityInCart() < item.getQuantity()) {
+                    inShopIcon.setImageResource(R.drawable.ic_smart_cart_orange_transparent);
+                    inShopQuantityView.setTextColor(Color.parseColor("#FFFF8800"));
+                } else {
+                    inShopIcon.setImageResource(R.drawable.ic_smart_cart_green_transparent);
+                    inShopQuantityView.setTextColor(Color.parseColor("#21690F"));
+                }
+
+            } else {
+                inShopLayout.setVisibility(View.GONE);
+                totalPriceView.setTextAppearance(R.style.Theme_SMart_Title);
             }
 
             // Click listener

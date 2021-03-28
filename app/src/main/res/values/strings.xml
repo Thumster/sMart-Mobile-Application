@@ -3,6 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_items">Items</string>
     <string name="title_cart">Cart</string>
+    <string name="title_transactions">Transactions</string>
     <string name="home_button_text">Test Button</string>
     <string name="no_results">No items found</string>
     <string name="title_promo">Promotion</string>
@@ -16,6 +17,8 @@
     <string name="title_qr_code">Scan QR Code</string>
     <string name="subtitle_qr_code">Hold your camera to scan a QR Code of a sMart basket.
          Please ensure it is an valid and unused basket.</string>
+    <string name="dialog_confirm_button">Confirm</string>
+    <string name="dialog_cancel_button">Cancel</string>
 
     <string name="title_activity_login">Login</string>
     <string name="title_login_provider">choose a provider</string>

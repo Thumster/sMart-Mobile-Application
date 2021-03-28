@@ -10,7 +10,7 @@
     <com.chauthai.swipereveallayout.SwipeRevealLayout
         android:id="@+id/item_slide_layout"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
+        android:layout_height="90dp"
         app:dragEdge="right"
         app:mode="same_level">
 
