@@ -1,11 +1,15 @@
 package com.example.smart;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +27,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MAIN_ACTIVITY";
 
     public List<String> PERMISSIONS_REQUIRED = Arrays.asList(Manifest.permission.CAMERA);
+
+    public BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,36 +69,80 @@ public class MainActivity extends AppCompatActivity
             // initialise the channel with channelId: "CHANNEL_ID"
             createNotificationChannel();
 
-            Button buttonShowNotification = findViewById(R.id.show);
 
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            // flags to associate what to do with an activity
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //if the pending intent alr exists, keep it but replace extra data with what is in the new intent
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            // Create a noti builder with the channel id + set params of notification (content intent supplies intent, auto cancel means noti is cancelled once clicked)
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
-                    .setSmallIcon(R.drawable.ic_baseline_notifications_24)
-                    .setContentTitle("textTitle")
-                    .setContentText("textContent")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-
-            // create a manager to perform tasks
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
             //listen on sth and use lambda expression to create a new view
-            buttonShowNotification.setOnClickListener(view -> {
-                notificationManager.notify(100, builder.build());
-            });
+//            buttonShowNotification.setOnClickListener(view -> {
+//                notificationManager.notify(100, builder.build());
+//            });
+
+            receiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String message = intent.getStringExtra("message");
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+                            .setMessage(message)
+                            .setTitle("Alert!")
+                            .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.cancel();
+                                }
+                            });
+                    builder.create().show();
+
+                    Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
+                    // flags to associate what to do with an activity
+                    notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    //if the pending intent alr exists, keep it but replace extra data with what is in the new intent
+                    PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    // Create a noti builder with the channel id + set params of notification (content intent supplies intent, auto cancel means noti is cancelled once clicked)
+                    NotificationCompat.Builder notiBuilder = new NotificationCompat.Builder(MainActivity.this, "CHANNEL_ID")
+                            .setSmallIcon(R.drawable.ic_baseline_notifications_24)
+                            .setContentTitle("sMart")
+                            .setContentText(message)
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setContentIntent(pendingIntent)
+                            .setAutoCancel(true);
+
+                    // create a manager to perform tasks
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainActivity.this);
+
+                    notificationManager.notify(100, notiBuilder.build());
+
+                }
+            };
+
+            IntentFilter filter = new IntentFilter(Intent.ACTION_SEND);
+            LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         } else {
             Intent loginPage = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(loginPage);
             finish();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        IntentFilter filter = new IntentFilter(Intent.ACTION_SEND);
+//        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+//    }
+
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+//    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
