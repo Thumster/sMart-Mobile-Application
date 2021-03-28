@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.smart.MainActivity;
@@ -38,6 +39,10 @@ public class HomeFragment extends Fragment
 
     private static final String TAG = "HOME_FRAGMENT";
 
+    View shoppingLayout;
+    View notShoppingLayout;
+
+    TextView welcomeTextView;
     TextView nameTextView;
     TextView userCartTextView;
     Button buttonLogout;
@@ -45,15 +50,21 @@ public class HomeFragment extends Fragment
     Button buttonQrCode;
 
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+
+        notShoppingLayout = root.findViewById(R.id.layout_not_shopping);
+        shoppingLayout = root.findViewById(R.id.layout_shopping);
 
         nameTextView = root.findViewById(R.id.text_name);
         buttonLogout = root.findViewById(R.id.button_logout);
         buttonUnregisterCart = root.findViewById(R.id.button_unregister_cart);
         userCartTextView = root.findViewById(R.id.text_user_cart);
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
+        welcomeTextView = root.findViewById(R.id.text_welcome);
+
 
         nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
         buttonLogout.setOnClickListener(v -> {
@@ -81,15 +92,22 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onCartFound(Boolean found) {
+        Log.e("SHOPPING", found.toString());
         if (found) {
+            notShoppingLayout.setVisibility(View.GONE);
+            shoppingLayout.setVisibility(View.VISIBLE);
             userCartTextView.setText(FirebaseUtil.getCurrentUserCartId());
-            buttonUnregisterCart.setVisibility(View.VISIBLE);
-            userCartTextView.setVisibility(View.VISIBLE);
+
             buttonQrCode.setVisibility(View.GONE);
+//            buttonUnregisterCart.setVisibility(View.VISIBLE);
+//            userCartTextView.setVisibility(View.VISIBLE);
         } else {
-            buttonUnregisterCart.setVisibility(View.GONE);
-            userCartTextView.setVisibility(View.GONE);
+            notShoppingLayout.setVisibility(View.VISIBLE);
+            shoppingLayout.setVisibility(View.GONE);
+
             buttonQrCode.setVisibility(View.VISIBLE);
+//            userCartTextView.setVisibility(View.GONE);
+//            buttonUnregisterCart.setVisibility(View.GONE);
         }
     }
 

@@ -5,8 +5,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
-
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_shopping"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_user_cart"
+            style="@style/Theme.SMart.Subheader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/button_unregister_cart"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="ID of Cart" />
+
+        <Button
+            android:id="@+id/button_unregister_cart"
+            style="@style/Theme.SMart.SecondaryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Unregister cart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_user_cart" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_not_shopping"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_anchor="@+id/fab_qr_code"
@@ -46,47 +75,6 @@
             app:layout_constraintStart_toStartOf="@id/text_welcome"
             app:layout_constraintTop_toBottomOf="@id/text_welcome"
             tools:text="Name of User" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text_user_cart"
-            style="@style/Theme.SMart.Subheader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:textAlignment="center"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/button_unregister_cart"
-            app:layout_constraintVertical_chainStyle="packed"
-            tools:text="ID of Cart" />
-
-        <Button
-            android:id="@+id/button_unregister_cart"
-            style="@style/Theme.SMart.SecondaryButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Unregister cart"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_user_cart" />
-
-        <!--        <EditText-->
-        <!--            android:id="@+id/text_cart_id"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:hint="ENTER ID OF CART HERE"-->
-        <!--            app:layout_constraintBottom_toTopOf="@+id/button_scan" />-->
-
-        <!--        <Button-->
-        <!--            android:id="@+id/button_scan"-->
-        <!--            style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="TEST SCAN CART"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -98,7 +86,6 @@
         android:text="@string/button_scan_basket"
         android:textColor="@color/white"
         android:textSize="20dp"
-        android:visibility="gone"
         app:icon="@drawable/ic_qr_code"
         app:iconPadding="20dp"
         app:iconSize="40dp"

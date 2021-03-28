@@ -1,5 +1,6 @@
 package com.example.smart.adapter;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +69,8 @@ public class TransactionAdapter extends FirestoreAdapter<TransactionAdapter.View
             TransactionLineItemAdapter lineItemsAdapter = new TransactionLineItemAdapter(tx.getCartItems());
             transactionItemsRecycler.setLayoutManager(new LinearLayoutManager(context));
             transactionItemsRecycler.setAdapter(lineItemsAdapter);
-
+//            extendedLayout.getLayoutTransition()
+//                    .enableTransitionType(LayoutTransition.CHANGING);
             transactionLayout.setOnClickListener(v -> {
                 extendLayout = !extendLayout;
                 if (extendLayout) {
