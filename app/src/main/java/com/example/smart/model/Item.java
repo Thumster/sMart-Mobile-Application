@@ -4,11 +4,13 @@ import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 /**
  * Item POJO.
  */
 @IgnoreExtraProperties
-public class Item {
+public class Item implements Serializable {
 
     @DocumentId
     protected DocumentReference id;

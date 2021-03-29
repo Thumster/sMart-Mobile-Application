@@ -92,7 +92,6 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onCartFound(Boolean found) {
-        Log.e("SHOPPING", found.toString());
         if (found) {
             notShoppingLayout.setVisibility(View.GONE);
             shoppingLayout.setVisibility(View.VISIBLE);

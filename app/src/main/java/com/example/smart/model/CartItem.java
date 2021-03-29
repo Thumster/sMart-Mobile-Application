@@ -2,8 +2,10 @@ package com.example.smart.model;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 @IgnoreExtraProperties
-public class CartItem extends Item {
+public class CartItem extends Item implements Serializable {
 
     private Integer quantity;
 

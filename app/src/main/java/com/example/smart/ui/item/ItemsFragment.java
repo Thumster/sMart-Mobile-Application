@@ -29,6 +29,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
+import java.io.Serializable;
+
 public class ItemsFragment extends Fragment implements
         ItemAdapter.OnItemSelectedListener, ItemDialogFragment.ItemDialogListener {
 
@@ -53,6 +55,20 @@ public class ItemsFragment extends Fragment implements
         cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = itemsColRef;
         initRecyclerView(root);
+
+        Object receivedObject = getArguments().get("itemId");
+        if (receivedObject != null) {
+            String itemId = (String) receivedObject;
+            Log.i(TAG, "Received item: " + itemId);
+            FirebaseUtil.getItemsRef().document(itemId).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        onItemSelected(snapshot);
+                    }
+                }
+            });
+        }
 
         return root;
     }
