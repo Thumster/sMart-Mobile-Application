@@ -55,19 +55,20 @@ public class ItemsFragment extends Fragment implements
         cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = itemsColRef;
         initRecyclerView(root);
-
-        Object receivedObject = getArguments().get("itemId");
-        if (receivedObject != null) {
-            String itemId = (String) receivedObject;
-            Log.i(TAG, "Received item: " + itemId);
-            FirebaseUtil.getItemsRef().document(itemId).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot snapshot = task.getResult();
-                    if (snapshot.exists()) {
-                        onItemSelected(snapshot);
+        Bundle args = getArguments();
+        if (args != null) {
+            if (args.containsKey("itemId")) {
+                String itemId = (String) args.get("itemId");
+                Log.i(TAG, "Received item: " + itemId);
+                FirebaseUtil.getItemsRef().document(itemId).get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+                        if (snapshot.exists()) {
+                            onItemSelected(snapshot);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         return root;
