@@ -25,11 +25,13 @@ import com.google.firebase.firestore.Query;
 
 public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
 
+    private static final String TAG = "ITEM_ADAPTER";
     private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
 
     public interface OnItemSelectedListener {
 
         void onItemSelected(DocumentSnapshot item);
+
         void onItemAdded(DocumentSnapshot item);
 
     }
@@ -52,10 +54,15 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Item item = getSnapshot(position).toObject(Item.class);
-        viewBinderHelper.bind(holder.swipeRevealLayout, item.getId().getId());
+        DocumentSnapshot snapshot = getSnapshot(position);
+        try {
+            Item item = snapshot.toObject(Item.class);
+            viewBinderHelper.bind(holder.swipeRevealLayout, item.getId().getId());
 
-        holder.bind(getSnapshot(position), mListener);
+            holder.bind(getSnapshot(position), mListener);
+        } catch (RuntimeException ex) {
+            Log.e(TAG, "Unable to convert item to Item.class - Snapshot ID: " + snapshot.getId());
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
