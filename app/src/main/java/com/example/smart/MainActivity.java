@@ -46,11 +46,16 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MAIN_ACTIVITY";
     private static final String TAG_NOTIFICATION = "MAIN_ACTIVITY_NOTIFICATION";
 
-    public List<String> PERMISSIONS_REQUIRED = Arrays.asList(Manifest.permission.CAMERA);
+    public List<String> PERMISSIONS_REQUIRED = Arrays.asList(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.CAMERA,
+            Manifest.permission.INTERNET,
+            Manifest.permission.VIBRATE
+    );
 
     public BroadcastReceiver receiver;
     private static final String INTENT_ACTION_DISPLAY_ITEM = "DISPLAY_ITEM";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

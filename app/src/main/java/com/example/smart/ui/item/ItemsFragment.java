@@ -57,6 +57,7 @@ public class ItemsFragment extends Fragment implements
         initRecyclerView(root);
 
         Object receivedObject = getArguments().get("itemId");
+
         if (receivedObject != null) {
             String itemId = (String) receivedObject;
             Log.i(TAG, "Received item: " + itemId);

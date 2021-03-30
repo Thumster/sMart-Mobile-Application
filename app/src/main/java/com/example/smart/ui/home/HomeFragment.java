@@ -15,6 +15,17 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.estimote.indoorsdk.EstimoteCloudCredentials;
+import com.estimote.indoorsdk.IndoorLocationManagerBuilder;
+import com.estimote.indoorsdk_module.algorithm.OnPositionUpdateListener;
+import com.estimote.indoorsdk_module.algorithm.ScanningIndoorLocationManager;
+import com.estimote.indoorsdk_module.cloud.CloudCallback;
+import com.estimote.indoorsdk_module.cloud.EstimoteCloudException;
+import com.estimote.indoorsdk_module.cloud.IndoorCloudManager;
+import com.estimote.indoorsdk_module.cloud.IndoorCloudManagerFactory;
+import com.estimote.indoorsdk_module.cloud.Location;
+import com.estimote.indoorsdk_module.cloud.LocationPosition;
+import com.estimote.indoorsdk_module.view.IndoorLocationView;
 import com.example.smart.MainActivity;
 import com.example.smart.R;
 import com.example.smart.util.FirebaseUtil;
@@ -25,6 +36,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +53,7 @@ public class HomeFragment extends Fragment
     OnFragmentInteractionListener listener;
 
     private static final String TAG = "HOME_FRAGMENT";
+    private final NumberFormat DECIMAL_FORMATTER = new DecimalFormat("#0.00");
 
     View shoppingLayout;
     View notShoppingLayout;
@@ -49,7 +65,10 @@ public class HomeFragment extends Fragment
     Button buttonUnregisterCart;
     Button buttonQrCode;
 
-
+    Location location;
+    // TextView coordinateTextView;
+    // IndoorLocationView indoorLocationView;
+    ScanningIndoorLocationManager indoorLocationManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -65,16 +84,19 @@ public class HomeFragment extends Fragment
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
         welcomeTextView = root.findViewById(R.id.text_welcome);
 
+        // indoorLocationView = (IndoorLocationView) root.findViewById(R.id.indoorLocationView);
+        // coordinateTextView = (TextView) root.findViewById(R.id.coordinateTextView);
 
-        nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
+        nameTextView.setText(FirebaseUtil.getCurrentUser()
+                                         .getDisplayName());
         buttonLogout.setOnClickListener(v -> {
                     AuthUI.getInstance()
-                            .signOut(v.getContext())
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                public void onComplete(Task<Void> task) {
-                                    ((MainActivity) v.getContext()).recreate();
-                                }
-                            });
+                          .signOut(v.getContext())
+                          .addOnCompleteListener(new OnCompleteListener<Void>() {
+                              public void onComplete(Task<Void> task) {
+                                  ((MainActivity) v.getContext()).recreate();
+                              }
+                          });
                 }
 
         );
@@ -85,6 +107,61 @@ public class HomeFragment extends Fragment
         });
         buttonQrCode.setOnClickListener(v -> {
             listener.onSelectScanBasket(this);
+        });
+
+        Log.i("HomeFragment", "Instantiating Cloud Manager");
+
+        IndoorCloudManager cloudManager = new IndoorCloudManagerFactory().create(
+                root.getContext(),
+                new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
+        );
+
+        cloudManager.getLocation("smart-test-2", new CloudCallback<Location>() {
+            @Override
+            public void success(Location location) {
+                Log.i("HomeFragment", "Successfully connected to Estimote Cloud Server");
+
+                HomeFragment.this.location = location;
+
+                // indoorLocationView.setLocation(location);
+                indoorLocationManager = new IndoorLocationManagerBuilder(
+                        root.getContext(),
+                        location,
+                        new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
+                ).withDefaultScanner()
+                 .build();
+
+                indoorLocationManager.setOnPositionUpdateListener(new OnPositionUpdateListener() {
+                    @Override
+                    public void onPositionUpdate(@NotNull LocationPosition locationPosition) {
+                        // indoorLocationView.updatePosition(locationPosition);
+
+                        // LocationPosition lp = new LocationPosition(7.05, 9.28, 0.00);
+                        // indoorLocationView.updatePosition(lp);
+
+                        String position = "X: " + DECIMAL_FORMATTER.format(locationPosition.getX())
+                                + "; Y: " + DECIMAL_FORMATTER.format(locationPosition.getY())
+                                + "; O: " + locationPosition.getOrientation();
+
+                        Log.i("onPositionUpdate", position);
+                        // coordinateTextView.setText(position);
+                    }
+
+                    @Override
+                    public void onPositionOutsideLocation() {
+                        // indoorLocationView.hidePosition();
+                        // Log.i("onPositionOutsideLocation", "Outside...");
+                        // coordinateTextView.setText("Out of range");
+                    }
+                });
+
+                indoorLocationManager.startPositioning();
+            }
+
+            @Override
+            public void failure(@NotNull EstimoteCloudException e) {
+                Log.e("Estimote Location Error", e.toString());
+            }
         });
 
         return root;
@@ -110,7 +187,6 @@ public class HomeFragment extends Fragment
         }
     }
 
-
     @Override
     public void onScanResultListener(String cartId) {
         updateCartToRegistered(cartId);
@@ -120,21 +196,25 @@ public class HomeFragment extends Fragment
         Log.i(TAG, "ATTEMPTING TO UNREGISTER CART ID: " + FirebaseUtil.getCurrentUserCartId());
         if (!FirebaseUtil.getIsCurrentlyShopping()) {
             Log.i(TAG, "User is not registered to a shopping cart");
-            Toast.makeText(getContext(), "You are not currently shopping", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "You are not currently shopping", Toast.LENGTH_LONG)
+                 .show();
             return;
         }
-        DocumentReference cartDocRef = FirebaseUtil.getCartsRef().document(FirebaseUtil.getCurrentUserCartId());
+        DocumentReference cartDocRef = FirebaseUtil.getCartsRef()
+                                                   .document(FirebaseUtil.getCurrentUserCartId());
         Map<String, Object> updates = new HashMap<>();
         updates.put(FirebaseUtil.CART_USER_DOC_NAME, FieldValue.delete());
-        cartDocRef.update(updates).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Log.i(TAG, "Successfully unregistered cart");
-                updateCartToRegistered(null);
-                Toast.makeText(getContext(), "Successfully unregistered cart!", Toast.LENGTH_LONG).show();
-            } else {
-                Log.e(TAG, "firestore update failed with ", task.getException());
-            }
-        });
+        cartDocRef.update(updates)
+                  .addOnCompleteListener(task -> {
+                      if (task.isSuccessful()) {
+                          Log.i(TAG, "Successfully unregistered cart");
+                          updateCartToRegistered(null);
+                          Toast.makeText(getContext(), "Successfully unregistered cart!", Toast.LENGTH_LONG)
+                               .show();
+                      } else {
+                          Log.e(TAG, "firestore update failed with ", task.getException());
+                      }
+                  });
     }
 
     private void updateCartToRegistered(String cartId) {
@@ -160,5 +240,18 @@ public class HomeFragment extends Fragment
         listener = null;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (indoorLocationManager != null) {
+            indoorLocationManager.stopPositioning();
+        }
+    }
 }
 

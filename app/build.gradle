@@ -51,6 +51,9 @@ dependencies {
 
     implementation 'com.android.volley:volley:1.2.0'
 
+    // Indoor positioning
+    implementation 'com.estimote:indoorsdk:2.5.3'
+
     // Tests
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
