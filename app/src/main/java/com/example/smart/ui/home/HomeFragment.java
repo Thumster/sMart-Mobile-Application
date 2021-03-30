@@ -1,6 +1,10 @@
 package com.example.smart.ui.home;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import com.estimote.indoorsdk.EstimoteCloudCredentials;
@@ -55,6 +61,15 @@ public class HomeFragment extends Fragment
     private static final String TAG = "HOME_FRAGMENT";
     private final NumberFormat DECIMAL_FORMATTER = new DecimalFormat("#0.00");
 
+    private final int TABLE_LENGTH = 3;
+    private final int TABLE_WIDTH = 10;
+    private final int DISTANCE_FROM_MAIN_DOOR = 8;
+    private final int DISTANCE_BETWEEN_TABLE_IN_LENGTH = 4;
+    private final int DISTANCE_BETWEEN_TABLE_IN_WIDTH = 28 - 2 * TABLE_WIDTH;
+
+    private double pixelsPerUnitWidth;
+    private double pixelsPerUnitLength;
+
     View shoppingLayout;
     View notShoppingLayout;
 
@@ -69,6 +84,18 @@ public class HomeFragment extends Fragment
     // TextView coordinateTextView;
     // IndoorLocationView indoorLocationView;
     ScanningIndoorLocationManager indoorLocationManager;
+    LocationPosition currentPosition;
+
+    Paint wallPaint = new Paint(); // Stores how to draw, e.g., color, style, line thickness, text size, etc
+    Paint tablePaint = new Paint();
+    Paint personPaint = new Paint();
+
+    Rect wallRectangle = new Rect(); // Rectangle
+    Rect tableRectangle = new Rect(); // Rectangle
+
+    Canvas canvasIndoorMap; // Stores information on what to draw onto its associated bitmap, e.g., lines, circles, text, custom paths, etc
+    ImageView imageViewIndoorMap; // Container for bitmap
+    Bitmap bitmapIndoorMap; // Represents the pixels that are shown on the display
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -84,6 +111,7 @@ public class HomeFragment extends Fragment
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
         welcomeTextView = root.findViewById(R.id.text_welcome);
 
+        imageViewIndoorMap = root.findViewById(R.id.image_view_indoor_map);
         // indoorLocationView = (IndoorLocationView) root.findViewById(R.id.indoorLocationView);
         // coordinateTextView = (TextView) root.findViewById(R.id.coordinateTextView);
 
@@ -109,23 +137,76 @@ public class HomeFragment extends Fragment
             listener.onSelectScanBasket(this);
         });
 
-        Log.i("HomeFragment", "Instantiating Cloud Manager");
+        imageViewIndoorMap.setOnClickListener(view -> {
+            // A bitmap configuration describes how pixels are stored.
+            bitmapIndoorMap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+            imageViewIndoorMap.setImageBitmap(bitmapIndoorMap);
+            canvasIndoorMap = new Canvas(bitmapIndoorMap); // Drawing on the canvas draws on the bitmap.
 
+            pixelsPerUnitWidth = view.getWidth() / 28.00;
+            pixelsPerUnitLength = view.getHeight() / 37.00;
+
+            // Log.i("Width", Integer.toString(view.getWidth()));
+            // Log.i("Pixels Per Unit Width", Double.toString(pixelsPerUnitWidth));
+            // Log.i("Height", Integer.toString(view.getHeight()));
+            // Log.i("Pixels Per Unit Length", Double.toString(pixelsPerUnitLength));
+
+            wallPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.black, null));
+            tablePaint.setColor(ResourcesCompat.getColor(getResources(), R.color.dark_green_variant, null));
+            personPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.light_blue, null));
+
+            wallRectangle.set(0, 0, (int) (TABLE_WIDTH * pixelsPerUnitWidth), (int) (DISTANCE_FROM_MAIN_DOOR * pixelsPerUnitLength));
+            canvasIndoorMap.drawRect(wallRectangle, wallPaint);
+
+            for (int i = 0; i < 4; i++) {
+                tableRectangle.set(
+                        0,
+                        (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
+                        (int) (TABLE_WIDTH * pixelsPerUnitWidth),
+                        (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
+                );
+                canvasIndoorMap.drawRect(tableRectangle, tablePaint);
+            }
+
+            for (int i = 0; i < 4; i++) {
+                tableRectangle.set(
+                        (int) ((TABLE_WIDTH + DISTANCE_BETWEEN_TABLE_IN_WIDTH) * pixelsPerUnitWidth),
+                        (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
+                        view.getWidth(),
+                        (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
+                );
+                canvasIndoorMap.drawRect(tableRectangle, tablePaint);
+            }
+
+            if (currentPosition != null) {
+                float currentX = (float) (currentPosition.getX() * pixelsPerUnitWidth);
+                float currentY = (float) ((9.28 - currentPosition.getY()) * pixelsPerUnitLength);
+                canvasIndoorMap.drawCircle(currentX / 0.25f, currentY / 0.25f, (float) (view.getWidth() / 30), personPaint);
+
+                // Log.i("Current X", Float.toString(currentX / 0.25f));
+                // Log.i("Current Y", Float.toString(currentY / 0.25f));
+            }
+
+            view.invalidate();
+        });
+
+        return root;
+    }
+
+    private void instantiateIndoorPositioning() {
         IndoorCloudManager cloudManager = new IndoorCloudManagerFactory().create(
-                root.getContext(),
+                getContext(),
                 new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
         );
 
         cloudManager.getLocation("smart-test-2", new CloudCallback<Location>() {
             @Override
             public void success(Location location) {
-                Log.i("HomeFragment", "Successfully connected to Estimote Cloud Server");
-
                 HomeFragment.this.location = location;
 
                 // indoorLocationView.setLocation(location);
                 indoorLocationManager = new IndoorLocationManagerBuilder(
-                        root.getContext(),
+                        getContext(),
                         location,
                         new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
                 ).withDefaultScanner()
@@ -134,16 +215,17 @@ public class HomeFragment extends Fragment
                 indoorLocationManager.setOnPositionUpdateListener(new OnPositionUpdateListener() {
                     @Override
                     public void onPositionUpdate(@NotNull LocationPosition locationPosition) {
+                        currentPosition = locationPosition;
                         // indoorLocationView.updatePosition(locationPosition);
 
                         // LocationPosition lp = new LocationPosition(7.05, 9.28, 0.00);
                         // indoorLocationView.updatePosition(lp);
 
-                        String position = "X: " + DECIMAL_FORMATTER.format(locationPosition.getX())
-                                + "; Y: " + DECIMAL_FORMATTER.format(locationPosition.getY())
-                                + "; O: " + locationPosition.getOrientation();
+                        // String position = "X: " + DECIMAL_FORMATTER.format(locationPosition.getX())
+                        //        + "; Y: " + DECIMAL_FORMATTER.format(locationPosition.getY())
+                        //        + "; O: " + locationPosition.getOrientation();
 
-                        Log.i("onPositionUpdate", position);
+                        // Log.i("onPositionUpdate", position);
                         // coordinateTextView.setText(position);
                     }
 
@@ -163,8 +245,6 @@ public class HomeFragment extends Fragment
                 Log.e("Estimote Location Error", e.toString());
             }
         });
-
-        return root;
     }
 
     @Override
@@ -177,6 +257,8 @@ public class HomeFragment extends Fragment
             buttonQrCode.setVisibility(View.GONE);
 //            buttonUnregisterCart.setVisibility(View.VISIBLE);
 //            userCartTextView.setVisibility(View.VISIBLE);
+
+            instantiateIndoorPositioning();
         } else {
             notShoppingLayout.setVisibility(View.VISIBLE);
             shoppingLayout.setVisibility(View.GONE);
@@ -184,6 +266,10 @@ public class HomeFragment extends Fragment
             buttonQrCode.setVisibility(View.VISIBLE);
 //            userCartTextView.setVisibility(View.GONE);
 //            buttonUnregisterCart.setVisibility(View.GONE);
+
+            if (indoorLocationManager != null) {
+                indoorLocationManager.stopPositioning();
+            }
         }
     }
 
