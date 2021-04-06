@@ -19,6 +19,9 @@ public class Item implements Serializable {
     protected Double price;
     protected Double oldPrice;
     protected String photo;
+    protected Integer posX;
+    protected Integer posY;
+    protected Integer sortIdx;
 
     public Item() {
     }
@@ -78,5 +81,29 @@ public class Item implements Serializable {
 
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public Integer getPosX() {
+        return posX;
+    }
+
+    public void setPosX(Integer posX) {
+        this.posX = posX;
+    }
+
+    public Integer getPosY() {
+        return posY;
+    }
+
+    public void setPosY(Integer posY) {
+        this.posY = posY;
+    }
+
+    public Integer getSortIdx() {
+        return sortIdx;
+    }
+
+    public void setSortIdx(Integer sortIdx) {
+        this.sortIdx = sortIdx;
     }
 }

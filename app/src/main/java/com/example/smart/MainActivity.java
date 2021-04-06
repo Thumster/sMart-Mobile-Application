@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
             LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
             Intent receivedIntent = getIntent();
-            if (receivedIntent.getAction().equals(INTENT_ACTION_DISPLAY_ITEM)) {
+            if (receivedIntent.getAction() != null && receivedIntent.getAction().equals(INTENT_ACTION_DISPLAY_ITEM)) {
                 navController.navigate(R.id.navigation_items, receivedIntent.getExtras());
             }
         } else {

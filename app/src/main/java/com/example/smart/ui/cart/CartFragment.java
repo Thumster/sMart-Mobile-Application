@@ -212,7 +212,11 @@ public class CartFragment extends Fragment implements
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.i(TAG, "Successful write to firestore");
-                    Toast.makeText(getContext(), "Item detected in cart, only deleted excess", Toast.LENGTH_LONG).show();
+                    try {
+                        Toast.makeText(getContext(), "Item detected in cart, only deleted excess", Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+
+                    }
                 }
             })
                     .addOnFailureListener(new OnFailureListener() {
@@ -226,7 +230,11 @@ public class CartFragment extends Fragment implements
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.i(TAG, "Successful delete from firestore");
-                    Toast.makeText(getContext(), "Successfully deleted from cart", Toast.LENGTH_LONG).show();
+                    try {
+                        Toast.makeText(getContext(), "Successfully deleted from cart", Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+
+                    }
                 }
             })
                     .addOnFailureListener(new OnFailureListener() {
