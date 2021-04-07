@@ -75,9 +75,7 @@ public class HomeFragment extends Fragment
 
     TextView welcomeTextView;
     TextView nameTextView;
-    TextView userCartTextView;
     Button buttonLogout;
-    Button buttonUnregisterCart;
     Button buttonQrCode;
 
     Location location;
@@ -106,8 +104,6 @@ public class HomeFragment extends Fragment
 
         nameTextView = root.findViewById(R.id.text_name);
         buttonLogout = root.findViewById(R.id.button_logout);
-        buttonUnregisterCart = root.findViewById(R.id.button_unregister_cart);
-        userCartTextView = root.findViewById(R.id.text_user_cart);
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
         welcomeTextView = root.findViewById(R.id.text_welcome);
 
@@ -115,24 +111,20 @@ public class HomeFragment extends Fragment
         // indoorLocationView = (IndoorLocationView) root.findViewById(R.id.indoorLocationView);
         // coordinateTextView = (TextView) root.findViewById(R.id.coordinateTextView);
 
-        nameTextView.setText(FirebaseUtil.getCurrentUser()
-                                         .getDisplayName());
+        nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
         buttonLogout.setOnClickListener(v -> {
                     AuthUI.getInstance()
-                          .signOut(v.getContext())
-                          .addOnCompleteListener(new OnCompleteListener<Void>() {
-                              public void onComplete(Task<Void> task) {
-                                  ((MainActivity) v.getContext()).recreate();
-                              }
-                          });
+                            .signOut(v.getContext())
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                public void onComplete(Task<Void> task) {
+                                    ((MainActivity) v.getContext()).recreate();
+                                }
+                            });
                 }
 
         );
         FirebaseUtil.startListening(this);
         onCartFound(FirebaseUtil.getCurrentUserCartId() != null);
-        buttonUnregisterCart.setOnClickListener(v -> {
-            unregisterCart();
-        });
         buttonQrCode.setOnClickListener(v -> {
             listener.onSelectScanBasket(this);
         });
@@ -210,7 +202,7 @@ public class HomeFragment extends Fragment
                         location,
                         new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
                 ).withDefaultScanner()
-                 .build();
+                        .build();
 
                 indoorLocationManager.setOnPositionUpdateListener(new OnPositionUpdateListener() {
                     @Override
@@ -252,7 +244,6 @@ public class HomeFragment extends Fragment
         if (found) {
             notShoppingLayout.setVisibility(View.GONE);
             shoppingLayout.setVisibility(View.VISIBLE);
-            userCartTextView.setText(FirebaseUtil.getCurrentUserCartId());
 
             buttonQrCode.setVisibility(View.GONE);
 //            buttonUnregisterCart.setVisibility(View.VISIBLE);
@@ -276,31 +267,6 @@ public class HomeFragment extends Fragment
     @Override
     public void onScanResultListener(String cartId) {
         updateCartToRegistered(cartId);
-    }
-
-    private void unregisterCart() {
-        Log.i(TAG, "ATTEMPTING TO UNREGISTER CART ID: " + FirebaseUtil.getCurrentUserCartId());
-        if (!FirebaseUtil.getIsCurrentlyShopping()) {
-            Log.i(TAG, "User is not registered to a shopping cart");
-            Toast.makeText(getContext(), "You are not currently shopping", Toast.LENGTH_LONG)
-                 .show();
-            return;
-        }
-        DocumentReference cartDocRef = FirebaseUtil.getCartsRef()
-                                                   .document(FirebaseUtil.getCurrentUserCartId());
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(FirebaseUtil.CART_USER_DOC_NAME, FieldValue.delete());
-        cartDocRef.update(updates)
-                  .addOnCompleteListener(task -> {
-                      if (task.isSuccessful()) {
-                          Log.i(TAG, "Successfully unregistered cart");
-                          updateCartToRegistered(null);
-                          Toast.makeText(getContext(), "Successfully unregistered cart!", Toast.LENGTH_LONG)
-                               .show();
-                      } else {
-                          Log.e(TAG, "firestore update failed with ", task.getException());
-                      }
-                  });
     }
 
     private void updateCartToRegistered(String cartId) {

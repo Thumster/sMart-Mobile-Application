@@ -28,13 +28,16 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CartFragment extends Fragment implements
-        CartItemAdapter.OnItemSelectedListener {
+        CartItemAdapter.OnItemSelectedListener, FirebaseUtil.OnCartFound {
 
     private static final String TAG = "CART_ITEMS_FRAGMENT";
 
@@ -50,6 +53,10 @@ public class CartFragment extends Fragment implements
     private TextView inShopSummaryPriceView;
     private TextView inShopSummaryItemsNo;
     private ImageView inShopIcon;
+
+    private ViewGroup cartInfoView;
+    private TextView userCartTextView;
+    private ImageView buttonUnregisterCart;
 
     private Query query;
     private CollectionReference cartColRef;
@@ -70,9 +77,19 @@ public class CartFragment extends Fragment implements
         inShopSummaryItemsNo = root.findViewById(R.id.in_shop_summary_items);
         inShopIcon = root.findViewById(R.id.in_shop_icon_cart);
 
+        cartInfoView = root.findViewById(R.id.view_cart_info);
+        buttonUnregisterCart = root.findViewById(R.id.button_unregister_cart);
+        userCartTextView = root.findViewById(R.id.text_user_cart);
+
         cartColRef = FirebaseUtil.getUserCartItemsRef();
         query = cartColRef;
         initRecyclerView(root);
+
+        FirebaseUtil.startListening(this);
+        onCartFound(FirebaseUtil.getIsCurrentlyShopping());
+        buttonUnregisterCart.setOnClickListener(v -> {
+            unregisterCart();
+        });
 
         return root;
     }
@@ -105,6 +122,11 @@ public class CartFragment extends Fragment implements
 
                     String physicalCartTotalPrice = String.format("$%.2f", cartItemAdaptor.getTotalPriceOfPhysicalCart());
                     Integer physicalCartTotalItems = cartItemAdaptor.getTotalItemsInPhysicalCart();
+                    if (physicalCartTotalItems > 0) {
+                        buttonUnregisterCart.setVisibility(View.GONE);
+                    } else {
+                        buttonUnregisterCart.setVisibility(View.VISIBLE);
+                    }
                     if (FirebaseUtil.getIsCurrentlyShopping()) {
                         checkoutButton.setVisibility(View.VISIBLE);
                         inShopSummaryItemsNo.setVisibility(View.VISIBLE);
@@ -193,6 +215,43 @@ public class CartFragment extends Fragment implements
         super.onStop();
         if (cartItemAdaptor != null) {
             cartItemAdaptor.stopListening();
+        }
+    }
+
+    private void unregisterCart() {
+        Log.i(TAG, "ATTEMPTING TO UNREGISTER CART ID: " + FirebaseUtil.getCurrentUserCartId());
+        if (!FirebaseUtil.getIsCurrentlyShopping()) {
+            Log.i(TAG, "User is not registered to a shopping cart");
+            Toast.makeText(getContext(), "You are not currently shopping", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+        DocumentReference cartDocRef = FirebaseUtil.getCartsRef()
+                .document(FirebaseUtil.getCurrentUserCartId());
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(FirebaseUtil.CART_USER_DOC_NAME, FieldValue.delete());
+        cartDocRef.update(updates)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "Successfully unregistered cart");
+                        onCartFound(false);
+                        Toast.makeText(getContext(), "Successfully unregistered cart!", Toast.LENGTH_LONG)
+                                .show();
+                    } else {
+                        Log.e(TAG, "firestore update failed with ", task.getException());
+                    }
+                });
+    }
+
+    @Override
+    public void onCartFound(Boolean found) {
+        if (found) {
+            userCartTextView.setText(FirebaseUtil.getCurrentUserCartId());
+            cartInfoView.setVisibility(View.VISIBLE);
+            FirebaseUtil.setIsCurrentlyShopping(true);
+        } else {
+            cartInfoView.setVisibility(View.GONE);
+            FirebaseUtil.setIsCurrentlyShopping(false);
         }
     }
 
