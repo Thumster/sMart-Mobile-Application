@@ -18,10 +18,40 @@
             android:layout_height="0dp"
             android:layout_margin="8dp"
             android:background="@drawable/image_border"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/item_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:paddingVertical="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_previous_item"
+                style="@style/Theme.SMart.DirectionButton"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                app:icon="@drawable/ic_smart_cart_white_transparent"
+                app:iconSize="20dp"
+                android:layout_marginLeft="10dp"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_next_item"
+                style="@style/Theme.SMart.DirectionButton"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                app:icon="@drawable/ic_smart_cart_white_transparent"
+                app:iconSize="20dp"
+                android:layout_marginRight="10dp"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

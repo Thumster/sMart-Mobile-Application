@@ -11,13 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
@@ -31,23 +28,26 @@ import com.estimote.indoorsdk_module.cloud.IndoorCloudManager;
 import com.estimote.indoorsdk_module.cloud.IndoorCloudManagerFactory;
 import com.estimote.indoorsdk_module.cloud.Location;
 import com.estimote.indoorsdk_module.cloud.LocationPosition;
-import com.estimote.indoorsdk_module.view.IndoorLocationView;
 import com.example.smart.MainActivity;
 import com.example.smart.R;
+import com.example.smart.model.response.InitNavigateResponseVO;
+import com.example.smart.model.response.PathResponseVO;
+import com.example.smart.util.ApiUtilService;
 import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class HomeFragment extends Fragment
         implements FirebaseUtil.OnCartFound, QRDialogFragment.QRDialogListener {
@@ -60,6 +60,8 @@ public class HomeFragment extends Fragment
 
     private static final String TAG = "HOME_FRAGMENT";
     private final NumberFormat DECIMAL_FORMATTER = new DecimalFormat("#0.00");
+
+    ApiUtilService apiService;
 
     private final int TABLE_LENGTH = 3;
     private final int TABLE_WIDTH = 10;
@@ -98,6 +100,18 @@ public class HomeFragment extends Fragment
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(ApiUtilService.BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiUtilService.class);
+
+        Integer originX = 0;
+        Integer originY = 0;
+        callApiRefreshPath(originX, originY, "YvxptylcQC7o6s7fK7H9");
+        callApiInitNavigate(originX, originY);
 
         notShoppingLayout = root.findViewById(R.id.layout_not_shopping);
         shoppingLayout = root.findViewById(R.id.layout_shopping);
@@ -183,6 +197,48 @@ public class HomeFragment extends Fragment
         });
 
         return root;
+    }
+
+    private void callApiInitNavigate(int posX, int posY) {
+        Call<InitNavigateResponseVO> call = apiService.initNavigate(0, 0, FirebaseUtil.getCurrentUserUid());
+        call.enqueue(new Callback<InitNavigateResponseVO>() {
+            @Override
+            public void onResponse(Call<InitNavigateResponseVO> call, Response<InitNavigateResponseVO> response) {
+                if (response.isSuccessful()) {
+                    InitNavigateResponseVO initNavigateResponseVO = response.body();
+                    if (initNavigateResponseVO.getStatus() > 0) {
+                        Log.i("RECEIVED RESULT", initNavigateResponseVO.getStatus().toString());
+                    } else {
+                        Log.e("Failed to init navigation from API. RECEIVED FAILED RESULT", initNavigateResponseVO.getStatus().toString());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<InitNavigateResponseVO> call, Throwable t) {
+                Log.e(TAG, "Failed to init navigation from API: " + t.toString());
+            }
+        });
+    }
+
+    private void callApiRefreshPath(int posX, int posY, String itemId) {
+        Call<PathResponseVO> call = apiService.path(posX, posY, itemId, FirebaseUtil.getCurrentUserUid());
+        call.enqueue(new Callback<PathResponseVO>() {
+            @Override
+            public void onResponse(Call<PathResponseVO> call, Response<PathResponseVO> response) {
+                if (response.isSuccessful()) {
+                    PathResponseVO pathResponseVO = response.body();
+                    Log.i("RECEIVED RESULT", pathResponseVO.getItem());
+
+                    //@WK - call whatever u need to with the received result here
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PathResponseVO> call, Throwable t) {
+                Log.e(TAG, "Failed to retrieve path from API: " + t.toString());
+            }
+        });
     }
 
     private void instantiateIndoorPositioning() {

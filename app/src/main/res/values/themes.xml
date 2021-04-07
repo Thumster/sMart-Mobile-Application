@@ -35,6 +35,16 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="Theme.SMart.DirectionButton" parent="Widget.MaterialComponents.Button">
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="background">@color/light_green_variant</item>
+        <item name="backgroundTint">@color/transparent</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
     <style name="Theme.SMart.ChangeQuantityButton">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>

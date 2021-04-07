@@ -18,6 +18,9 @@ public class CartItem extends Item implements Serializable {
         super(item.getId(), item.getName(), item.getCategory(), item.getPrice(), item.getOldPrice(), item.getPhoto());
         this.quantity = 1;
         this.quantityInCart = 0;
+        super.posX = 0;
+        super.posY = 0;
+        super.sortIdx = 0;
     }
 
     public CartItem(Item item, Integer quantity, Integer quantityInCart) {

@@ -33,6 +33,9 @@ public class Item implements Serializable {
         this.price = price;
         this.oldPrice = oldPrice;
         this.photo = photo;
+        this.posX = 0;
+        this.posY = 0;
+        this.sortIdx = 0;
     }
 
     public DocumentReference getId() {
