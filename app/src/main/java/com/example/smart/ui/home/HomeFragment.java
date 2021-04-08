@@ -1,6 +1,7 @@
 package com.example.smart.ui.home;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,9 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.estimote.indoorsdk.EstimoteCloudCredentials;
 import com.estimote.indoorsdk.IndoorLocationManagerBuilder;
 import com.estimote.indoorsdk_module.algorithm.OnPositionUpdateListener;
@@ -30,6 +34,7 @@ import com.estimote.indoorsdk_module.cloud.Location;
 import com.estimote.indoorsdk_module.cloud.LocationPosition;
 import com.example.smart.MainActivity;
 import com.example.smart.R;
+import com.example.smart.model.CartItem;
 import com.example.smart.model.response.InitNavigateResponseVO;
 import com.example.smart.model.response.PathResponseVO;
 import com.example.smart.util.ApiUtilService;
@@ -37,11 +42,19 @@ import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,6 +69,13 @@ public class HomeFragment extends Fragment
         void onSelectScanBasket(QRDialogFragment.QRDialogListener listener);
     }
 
+    ListenerRegistration itemsListenerRegistration;
+    Query itemsQuery = FirebaseUtil.getUserCartItemsRef().orderBy("sortIdx", Query.Direction.ASCENDING);
+    ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
+    List<CartItem> validCartItems = new ArrayList<>();
+    CartItem currentCartItem;
+    Integer currentItemIdx = 0;
+
     OnFragmentInteractionListener listener;
 
     private static final String TAG = "HOME_FRAGMENT";
@@ -69,6 +89,11 @@ public class HomeFragment extends Fragment
     private final int DISTANCE_BETWEEN_TABLE_IN_LENGTH = 4;
     private final int DISTANCE_BETWEEN_TABLE_IN_WIDTH = 28 - 2 * TABLE_WIDTH;
 
+
+    // @WK - Manipulate these vars - for next and previous buttons on item selection
+    private Integer currX = 0;
+    private Integer currY = 0;
+
     private double pixelsPerUnitWidth;
     private double pixelsPerUnitLength;
 
@@ -79,6 +104,19 @@ public class HomeFragment extends Fragment
     TextView nameTextView;
     Button buttonLogout;
     Button buttonQrCode;
+
+    ConstraintLayout layoutItemView;
+    ConstraintLayout layoutEmptyItemView;
+    Button buttonRedirect;
+    Button buttonItemPrev;
+    Button buttonItemNext;
+    TextView textViewEmpty;
+    TextView textViewItemNumberLabel;
+    ImageView imageViewItem;
+    TextView textViewItemName;
+    TextView textViewItemCategory;
+    TextView textViewItemPrice;
+    TextView textViewItemQuantity;
 
     Location location;
     // TextView coordinateTextView;
@@ -110,7 +148,6 @@ public class HomeFragment extends Fragment
 
         Integer originX = 0;
         Integer originY = 0;
-        callApiRefreshPath(originX, originY, "YvxptylcQC7o6s7fK7H9");
         callApiInitNavigate(originX, originY);
 
         notShoppingLayout = root.findViewById(R.id.layout_not_shopping);
@@ -120,6 +157,19 @@ public class HomeFragment extends Fragment
         buttonLogout = root.findViewById(R.id.button_logout);
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
         welcomeTextView = root.findViewById(R.id.text_welcome);
+
+        layoutItemView = root.findViewById(R.id.item_view);
+        layoutEmptyItemView = root.findViewById(R.id.empty_item_view);
+        buttonRedirect = root.findViewById(R.id.button_redirect_items);
+        buttonItemPrev = root.findViewById(R.id.button_previous_item);
+        buttonItemNext = root.findViewById(R.id.button_next_item);
+        textViewEmpty = root.findViewById(R.id.empty_text);
+        textViewItemNumberLabel = root.findViewById(R.id.item_number_label);
+        imageViewItem = root.findViewById(R.id.item_image);
+        textViewItemName = root.findViewById(R.id.item_name);
+        textViewItemCategory = root.findViewById(R.id.item_category);
+        textViewItemPrice = root.findViewById(R.id.item_price);
+        textViewItemQuantity = root.findViewById(R.id.in_shop_quantity);
 
         imageViewIndoorMap = root.findViewById(R.id.image_view_indoor_map);
         // indoorLocationView = (IndoorLocationView) root.findViewById(R.id.indoorLocationView);
@@ -141,6 +191,19 @@ public class HomeFragment extends Fragment
         onCartFound(FirebaseUtil.getCurrentUserCartId() != null);
         buttonQrCode.setOnClickListener(v -> {
             listener.onSelectScanBasket(this);
+        });
+
+        initItemsRegistrationListener();
+        buttonRedirect.setOnClickListener(v -> {
+            Navigation.findNavController(root).navigate(R.id.navigation_items);
+        });
+        buttonItemPrev.setOnClickListener(v -> {
+            currentItemIdx = Math.max(0, currentItemIdx - 1);
+            onDataChanged();
+        });
+        buttonItemNext.setOnClickListener(v -> {
+            currentItemIdx = Math.min(validCartItems.size() - 1, currentItemIdx + 1);
+            onDataChanged();
         });
 
         imageViewIndoorMap.setOnClickListener(view -> {
@@ -199,6 +262,98 @@ public class HomeFragment extends Fragment
         return root;
     }
 
+    private void initItemsRegistrationListener() {
+        itemsListenerRegistration = itemsQuery.addSnapshotListener((snapshots, error) -> {
+            if (error != null) {
+                Log.w(TAG, "listen:error", error);
+                return;
+            }
+
+            for (DocumentChange change : snapshots.getDocumentChanges()) {
+                // Snapshot of the changed document
+                DocumentSnapshot snapshot = change.getDocument();
+
+                switch (change.getType()) {
+                    case ADDED:
+                        onDocumentAdded(change); // Add this line
+                        break;
+                    case MODIFIED:
+                        onDocumentModified(change); // Add this line
+                        break;
+                    case REMOVED:
+                        onDocumentRemoved(change); // Add this line
+                        break;
+                }
+            }
+
+            onDataChanged();
+        });
+    }
+
+    private void onDataChanged() {
+        validCartItems = mSnapshots.stream()
+                .map(documentSnapshot -> documentSnapshot.toObject(CartItem.class))
+                .filter(cartItem -> cartItem.getQuantity() > cartItem.getQuantityInCart())
+                .collect(Collectors.toList());
+        if (mSnapshots.isEmpty()) {
+            textViewEmpty.setText("No Items Found in Your Shopping List");
+            buttonRedirect.setText("Shop Now");
+        } else {
+            textViewEmpty.setText("Shopping List Complete");
+            buttonRedirect.setText("Shop More");
+        }
+        if (validCartItems.isEmpty()) {
+            layoutEmptyItemView.setVisibility(View.VISIBLE);
+            layoutItemView.setVisibility(View.INVISIBLE);
+            return;
+        } else {
+            layoutEmptyItemView.setVisibility(View.INVISIBLE);
+            layoutItemView.setVisibility(View.VISIBLE);
+        }
+        if (currentItemIdx >= validCartItems.size()) {
+            currentItemIdx--;
+        }
+        if (validCartItems.contains(currentCartItem)) {
+            currentItemIdx = validCartItems.indexOf(validCartItems);
+        }
+        currentCartItem = validCartItems.get(currentItemIdx);
+
+
+        if (currentCartItem == null) {
+            return;
+        }
+
+        // Load image
+        Glide.with(imageViewItem.getContext())
+                .load(currentCartItem.getPhoto())
+                .into(imageViewItem);
+        textViewItemNumberLabel.setText(String.format("%d / %d", currentItemIdx + 1, validCartItems.size()));
+        textViewItemName.setText(currentCartItem.getName());
+        textViewItemCategory.setText(currentCartItem.getCategory());
+        textViewItemPrice.setText(String.format("$%.2f", currentCartItem.getPrice()));
+        textViewItemQuantity.setText(String.format("%d / %d", currentCartItem.getQuantityInCart(), currentCartItem.getQuantity()));
+
+        // @WK - calling the path update here
+        callApiRefreshPath(currX, currY, currentCartItem.getId().getId());
+    }
+
+    private void onDocumentAdded(DocumentChange change) {
+        mSnapshots.add(change.getNewIndex(), change.getDocument());
+    }
+
+    private void onDocumentModified(DocumentChange change) {
+        if (change.getOldIndex() == change.getNewIndex()) {
+            mSnapshots.set(change.getOldIndex(), change.getDocument());
+        } else {
+            mSnapshots.remove(change.getOldIndex());
+            mSnapshots.add(change.getNewIndex(), change.getDocument());
+        }
+    }
+
+    private void onDocumentRemoved(DocumentChange change) {
+        mSnapshots.remove(change.getOldIndex());
+    }
+
     private void callApiInitNavigate(int posX, int posY) {
         Call<InitNavigateResponseVO> call = apiService.initNavigate(0, 0, FirebaseUtil.getCurrentUserUid());
         call.enqueue(new Callback<InitNavigateResponseVO>() {
@@ -230,7 +385,7 @@ public class HomeFragment extends Fragment
                     PathResponseVO pathResponseVO = response.body();
                     Log.i("RECEIVED RESULT", pathResponseVO.getItem());
 
-                    //@WK - call whatever u need to with the received result here
+                    //@WK - call whatever u need to with the received result here [PATH]
                 }
             }
 
@@ -300,19 +455,12 @@ public class HomeFragment extends Fragment
         if (found) {
             notShoppingLayout.setVisibility(View.GONE);
             shoppingLayout.setVisibility(View.VISIBLE);
-
             buttonQrCode.setVisibility(View.GONE);
-//            buttonUnregisterCart.setVisibility(View.VISIBLE);
-//            userCartTextView.setVisibility(View.VISIBLE);
-
             instantiateIndoorPositioning();
         } else {
             notShoppingLayout.setVisibility(View.VISIBLE);
             shoppingLayout.setVisibility(View.GONE);
-
             buttonQrCode.setVisibility(View.VISIBLE);
-//            userCartTextView.setVisibility(View.GONE);
-//            buttonUnregisterCart.setVisibility(View.GONE);
 
             if (indoorLocationManager != null) {
                 indoorLocationManager.stopPositioning();
@@ -359,6 +507,10 @@ public class HomeFragment extends Fragment
 
         if (indoorLocationManager != null) {
             indoorLocationManager.stopPositioning();
+        }
+
+        if (itemsListenerRegistration != null) {
+            itemsListenerRegistration.remove();
         }
     }
 }

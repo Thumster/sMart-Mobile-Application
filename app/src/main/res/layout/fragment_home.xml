@@ -18,38 +18,166 @@
             android:layout_height="0dp"
             android:layout_margin="8dp"
             android:background="@drawable/image_border"
-            app:layout_constraintBottom_toTopOf="@+id/item_view"
+            app:layout_constraintBottom_toTopOf="@+id/item_view_container"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/item_view"
+            android:id="@+id/item_view_container"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="110dp"
             android:paddingVertical="5dp"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_previous_item"
-                style="@style/Theme.SMart.DirectionButton"
-                android:layout_width="30dp"
-                android:layout_height="match_parent"
-                app:icon="@drawable/ic_smart_cart_white_transparent"
-                app:iconSize="20dp"
-                android:layout_marginLeft="10dp"
-                app:layout_constraintStart_toStartOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/empty_item_view"
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:layout_height="match_parent">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_next_item"
-                style="@style/Theme.SMart.DirectionButton"
-                android:layout_width="30dp"
+                <TextView
+                    android:id="@+id/empty_text"
+                    style="@style/Theme.SMart.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No Items In Cart"
+                    app:layout_constraintVertical_chainStyle="packed"
+                    android:textColor="@color/light_green"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/button_redirect_items"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_redirect_items"
+                    style="@style/Theme.SMart.SecondaryButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_redirect_shop"
+                    app:layout_constraintVertical_chainStyle="packed"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/empty_text"
+                    app:layout_constraintStart_toStartOf="@id/empty_text"
+                    app:layout_constraintTop_toBottomOf="@+id/empty_text" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/item_view"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:icon="@drawable/ic_smart_cart_white_transparent"
-                app:iconSize="20dp"
-                android:layout_marginRight="10dp"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_previous_item"
+                    style="@style/Theme.SMart.DirectionButton"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
+                    android:outlineSpotShadowColor="@color/light_green_variant"
+                    android:text="&lt;"
+                    android:textColor="@android:color/widget_edittext_dark"
+                    app:layout_constraintEnd_toStartOf="@id/item_image"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <ImageView
+                    android:id="@+id/item_image"
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:layout_marginLeft="5dp"
+                    android:background="#757575"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/food_1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/button_previous_item"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.7" />
+
+                <TextView
+                    android:id="@+id/item_name"
+                    style="@style/Theme.SMart.Title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    app:layout_constraintBottom_toTopOf="@id/item_category"
+                    app:layout_constraintEnd_toStartOf="@+id/button_next_item"
+                    app:layout_constraintStart_toEndOf="@+id/item_image"
+                    app:layout_constraintTop_toTopOf="@+id/item_image"
+                    tools:text="Item Name" />
+
+                <TextView
+                    android:id="@+id/item_category"
+                    style="@style/Theme.SMart.Subheader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    app:layout_constraintBottom_toTopOf="@id/item_price"
+                    app:layout_constraintStart_toEndOf="@+id/item_image"
+                    app:layout_constraintTop_toBottomOf="@+id/item_name"
+                    tools:text="Item Category" />
+
+                <TextView
+                    android:id="@+id/item_price"
+                    style="@style/Theme.SMart.Headline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/item_image"
+                    app:layout_constraintStart_toStartOf="@id/item_category"
+                    app:layout_constraintTop_toBottomOf="@id/item_category"
+                    tools:text="$$$" />
+
+                <TextView
+                    android:id="@+id/item_number_label"
+                    style="@style/Theme.SMart.Subheader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toTopOf="@+id/item_name"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="1"
+                    tools:text="3 / 5" />
+
+                <ImageView
+                    android:id="@+id/in_shop_icon_cart"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_smart_cart_green_transparent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/in_shop_quantity"
+                    app:layout_constraintHorizontal_bias="1"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@id/item_price"
+                    app:layout_constraintTop_toBottomOf="@id/item_name" />
+
+                <TextView
+                    android:id="@+id/in_shop_quantity"
+                    style="@style/Theme.SMart.Subheader"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/dark_green"
+                    app:layout_constraintBottom_toBottomOf="@id/in_shop_icon_cart"
+                    app:layout_constraintEnd_toStartOf="@+id/button_next_item"
+                    app:layout_constraintStart_toEndOf="@id/in_shop_icon_cart"
+                    app:layout_constraintTop_toTopOf="@id/in_shop_icon_cart"
+                    tools:text="no." />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_next_item"
+                    style="@style/Theme.SMart.DirectionButton"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:outlineSpotShadowColor="@color/light_green_variant"
+                    android:text=">"
+                    android:textColor="@android:color/widget_edittext_dark"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
