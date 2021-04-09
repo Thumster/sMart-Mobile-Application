@@ -69,6 +69,9 @@ public class HomeFragment extends Fragment
         void onSelectScanBasket(QRDialogFragment.QRDialogListener listener);
     }
 
+    ListenerRegistration cartsListenerRegistration;
+    Query cartsQuery = FirebaseUtil.getCartsRef();
+
     ListenerRegistration itemsListenerRegistration;
     Query itemsQuery = FirebaseUtil.getUserCartItemsRef().orderBy("sortIdx", Query.Direction.ASCENDING);
     ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
@@ -192,7 +195,7 @@ public class HomeFragment extends Fragment
         buttonQrCode.setOnClickListener(v -> {
             listener.onSelectScanBasket(this);
         });
-
+        initCartsRegistrationListener();
         initItemsRegistrationListener();
         buttonRedirect.setOnClickListener(v -> {
             Navigation.findNavController(root).navigate(R.id.navigation_items);
@@ -260,6 +263,46 @@ public class HomeFragment extends Fragment
         });
 
         return root;
+    }
+
+    private void initCartsRegistrationListener() {
+        cartsListenerRegistration = cartsQuery.addSnapshotListener((snapshots, error) -> {
+            if (error != null) {
+                Log.w(TAG, "listen:error", error);
+                return;
+            }
+            for (DocumentChange change : snapshots.getDocumentChanges()) {
+                // Snapshot of the changed document
+                DocumentSnapshot snapshot = change.getDocument();
+                String changeCartId = snapshot.getId();
+                String currentUserCartId = FirebaseUtil.getCurrentUserCartId();
+
+                Object changeUserIdObject = snapshot.get(FirebaseUtil.CART_USER_DOC_NAME);
+                String changeUserId = null;
+                if (changeUserIdObject != null) {
+                    changeUserId = (String) changeUserIdObject;
+                }
+                String currentUserId = FirebaseUtil.getCurrentUserUid();
+
+                switch (change.getType()) {
+                    case ADDED:
+                    case REMOVED:
+                        if (currentUserId.equals(changeUserId)) {
+                            updateCartToRegistered(changeCartId);
+                        }
+                        break;
+                    case MODIFIED:
+                        if (changeCartId.equals(currentUserCartId)) {
+                            if (changeUserId == null || !currentUserId.equals(changeUserId)) {
+                                updateCartToRegistered(null);
+                            }
+                        } else if (currentUserId.equals(changeUserId)) {
+                            updateCartToRegistered(changeCartId);
+                        }
+                        break;
+                }
+            }
+        });
     }
 
     private void initItemsRegistrationListener() {
@@ -511,6 +554,10 @@ public class HomeFragment extends Fragment
 
         if (itemsListenerRegistration != null) {
             itemsListenerRegistration.remove();
+        }
+
+        if (cartsListenerRegistration != null) {
+            cartsListenerRegistration.remove();
         }
     }
 }
