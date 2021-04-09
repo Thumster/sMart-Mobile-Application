@@ -13,19 +13,20 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.smart.model.Item;
 import com.example.smart.ui.home.HomeFragment;
 import com.example.smart.ui.home.QRDialogFragment;
 import com.example.smart.util.FirebaseUtil;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -37,7 +38,9 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity
         if (FirebaseUtil.isSignedIn()) {
             setContentView(R.layout.activity_main);
             FirebaseUtil.initCart();
+            initFirebaseMessagingToken();
             BottomNavigationView navView = findViewById(R.id.nav_view);
             // Passing each menu ID as a set of Ids because each
             // menu should be considered as top level destinations.
@@ -82,7 +86,7 @@ public class MainActivity extends AppCompatActivity
             receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    String receivedItemId = intent.getStringExtra("message");
+                    String receivedItemId = intent.getStringExtra("itemId");
                     DocumentReference doc = FirebaseUtil.getItemsRef().document(receivedItemId);
                     doc.get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity
                             if (snapshot.exists()) {
                                 Item item = snapshot.toObject(Item.class);
                                 Log.i(TAG_NOTIFICATION, "Successfully retrieved from Firestore item id: " + receivedItemId);
-                                performNotification(item, navController);
+                                performNotification(item, navController, intent);
                             } else {
                                 Log.e(TAG_NOTIFICATION, "Failed to retrieve from Firestore item id: " + receivedItemId);
                             }
@@ -115,20 +119,47 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void performNotification(Item item, NavController navController) {
-        Log.i(TAG_NOTIFICATION, "Performing notification creation of item: " + item.getName());
+    private void initFirebaseMessagingToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String token = instanceIdResult.getToken();
+                String userId = FirebaseUtil.getCurrentUserUid();
 
+                Log.i(TAG, "\nFirebase Messaging Token Successfully Retrieved:\n\tTOKEN IS: " + token + "\n\tUSERID IS: " + userId);
+
+                Map<String, Object> data = new HashMap<>();
+                data.put(FirebaseUtil.USER_FMS_TOKEN, token);
+
+                DocumentReference docRef = FirebaseUtil.getUserDocRef();
+                docRef.set(data, SetOptions.merge()).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "Successful write of token to Firestore");
+                    } else {
+                        Log.e(TAG, "Unsuccessful write. Token not written to Firestore");
+                        Log.e(TAG, task.getException().getMessage());
+                    }
+                });
+                // send it to server
+            }
+        });
+    }
+
+    private void performNotification(Item item, NavController navController, Intent intent) {
+        Log.i(TAG_NOTIFICATION, "Performing notification creation of item: " + item.getName());
+        String header = intent.getStringExtra("header");
+        String message = intent.getStringExtra("message");
 
         Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
         // flags to associate what to do with an activity
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         notificationIntent.setAction(INTENT_ACTION_DISPLAY_ITEM);
-        notificationIntent.putExtra("itemId", item.getId().getId());
+        notificationIntent.putExtras(intent);
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
-                .setMessage(item.getName())
-                .setTitle("New Recommendation")
+                .setMessage(message)
+                .setTitle(header)
                 .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -145,7 +176,7 @@ public class MainActivity extends AppCompatActivity
         // Create a noti builder with the channel id + set params of notification (content intent supplies intent, auto cancel means noti is cancelled once clicked)
         NotificationCompat.Builder notiBuilder = new NotificationCompat.Builder(MainActivity.this, "CHANNEL_ID")
                 .setSmallIcon(R.drawable.ic_smart_cart_green_transparent)
-                .setContentTitle("New Recommendation")
+                .setContentTitle(header)
                 .setContentText(item.getName())
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
