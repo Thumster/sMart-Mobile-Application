@@ -105,7 +105,6 @@ public class HomeFragment extends Fragment
 
     TextView welcomeTextView;
     TextView nameTextView;
-    Button buttonLogout;
     Button buttonQrCode;
 
     ConstraintLayout layoutItemView;
@@ -157,7 +156,6 @@ public class HomeFragment extends Fragment
         shoppingLayout = root.findViewById(R.id.layout_shopping);
 
         nameTextView = root.findViewById(R.id.text_name);
-        buttonLogout = root.findViewById(R.id.button_logout);
         buttonQrCode = root.findViewById(R.id.fab_qr_code);
         welcomeTextView = root.findViewById(R.id.text_welcome);
 
@@ -179,17 +177,6 @@ public class HomeFragment extends Fragment
         // coordinateTextView = (TextView) root.findViewById(R.id.coordinateTextView);
 
         nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
-        buttonLogout.setOnClickListener(v -> {
-                    AuthUI.getInstance()
-                            .signOut(v.getContext())
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                public void onComplete(Task<Void> task) {
-                                    ((MainActivity) v.getContext()).recreate();
-                                }
-                            });
-                }
-
-        );
         FirebaseUtil.startListening(this);
         onCartFound(FirebaseUtil.getCurrentUserCartId() != null);
         buttonQrCode.setOnClickListener(v -> {

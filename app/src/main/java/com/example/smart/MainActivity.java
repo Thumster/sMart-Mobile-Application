@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.example.smart.model.Item;
 import com.example.smart.ui.home.HomeFragment;
+import com.example.smart.ui.home.ProfileDialogFragment;
 import com.example.smart.ui.home.QRDialogFragment;
 import com.example.smart.util.FirebaseUtil;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +30,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -76,9 +78,20 @@ public class MainActivity extends AppCompatActivity
             AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                     R.id.navigation_home, R.id.navigation_items, R.id.navigation_cart, R.id.navigation_transactions)
                     .build();
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            toolbar.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.profile:
+                        new ProfileDialogFragment().show(getSupportFragmentManager(), TAG);
+                        return true;
+                    default:
+                        return false;
+                }
+            });
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+//            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
             NavigationUI.setupWithNavController(navView, navController);
+            NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
             // initialise the channel with channelId: "CHANNEL_ID"
             createNotificationChannel();
