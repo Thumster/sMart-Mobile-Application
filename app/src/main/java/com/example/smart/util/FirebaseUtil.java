@@ -33,6 +33,7 @@ public class FirebaseUtil {
     public static final String CART_USER_DOC_NAME = "user";
     public static final String USER_CART_ITEMS_COLLECTION_NAME = "cartItems";
     public static final String USER_TRANSACTIONS_COLLECTION_NAME = "transactions";
+    public static final String USER_RECOMMENDATION_HISTORY_COLLECTION_NAME = "recommendationsHistory";
     public static final String USER_FMS_TOKEN = "fms_token";
     public static final String USER_PROFILE_HABIT = "profile_habit";
     public static final String USER_PROFILE_RECOMMENDATION = "profile_recommendation";

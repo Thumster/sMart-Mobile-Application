@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.smart.model.Item;
+import com.example.smart.model.RecommendationHistory;
+import com.example.smart.model.enums.Enums;
 import com.example.smart.ui.home.HomeFragment;
 import com.example.smart.ui.home.ProfileDialogFragment;
 import com.example.smart.ui.home.QRDialogFragment;
@@ -25,6 +27,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
@@ -40,6 +43,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,14 +104,50 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     String receivedItemId = intent.getStringExtra("itemId");
-                    DocumentReference doc = FirebaseUtil.getItemsRef().document(receivedItemId);
-                    doc.get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot snapshot = task.getResult();
+                    // STEP 1 - CHECKING IF ITEM EXISTS
+                    FirebaseUtil.getItemsRef().document(receivedItemId).get().addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            DocumentSnapshot snapshot = task1.getResult();
                             if (snapshot.exists()) {
                                 Item item = snapshot.toObject(Item.class);
-                                Log.i(TAG_NOTIFICATION, "Successfully retrieved from Firestore item id: " + receivedItemId);
-                                performNotification(item, navController, intent);
+                                Log.i(TAG_NOTIFICATION, "Successfully retrieved from Firestore \n\titem id: " + receivedItemId + "\n\titem name: " + item.getName());
+                                // STEP 2 - RETRIEVING RECOMMENDATION INTERVAL
+                                FirebaseUtil.getUserDocRef().get().addOnCompleteListener(task2 -> {
+                                    Enums.RECOMMENDATION_ENUM recommendation_interval = Enums.RECOMMENDATION_ENUM.MIN;
+                                    if (task2.isSuccessful()) {
+                                        DocumentSnapshot snapshot2 = task2.getResult();
+                                        Map<String, Object> map = snapshot2.getData();
+                                        try {
+                                            recommendation_interval = Enums.RECOMMENDATION_ENUM.valueOf((String) map.get(FirebaseUtil.USER_PROFILE_RECOMMENDATION));
+                                            Log.i(TAG, "RETRIEVED RESULT RECOMMENDATION: " + recommendation_interval);
+                                            if (recommendation_interval == null)
+                                                throw new Exception();
+                                        } catch (Exception ex) {
+                                            recommendation_interval = Enums.RECOMMENDATION_ENUM.MIN;
+                                        }
+                                    }
+                                    Date dateRecommendationReceived = new Date();
+                                    Date recommendationsAfterThisDate = new Date(dateRecommendationReceived.getTime() - recommendation_interval.getMilliseconds());
+                                    Log.i(TAG, "\n\tRECOMMENDATION TYPE: " + recommendation_interval + "\n\tLOOK FOR RECOMMENDATIONS AFTER DATE: " + recommendationsAfterThisDate);
+                                    Query query = FirebaseUtil.getUserDocRef().collection(FirebaseUtil.USER_RECOMMENDATION_HISTORY_COLLECTION_NAME)
+                                            .whereEqualTo("itemId", receivedItemId)
+                                            .orderBy("recommendationDateTime", Query.Direction.DESCENDING)
+                                            .whereGreaterThan("recommendationDateTime", recommendationsAfterThisDate)
+                                            .limit(1);
+                                    query.get().addOnCompleteListener(task3 -> {
+                                        if (task3.isSuccessful()) {
+                                            List<DocumentSnapshot> results = task3.getResult().getDocuments();
+                                            if (results.isEmpty()) {
+                                                Log.i(TAG,"NO RECOMMENDATION HISTORY FOUND: performing notification now");
+                                                performNotification(item, navController, intent);
+                                                RecommendationHistory recommendationHistory = new RecommendationHistory(receivedItemId, dateRecommendationReceived);
+                                                FirebaseUtil.getUserDocRef().collection(FirebaseUtil.USER_RECOMMENDATION_HISTORY_COLLECTION_NAME).add(recommendationHistory);
+                                            } else {
+                                                Log.i(TAG,"RECOMMENDATION HISTORY FOUND WITHIN RANGE: SKIPPING NOTIFICATION");
+                                            }
+                                        }
+                                    });
+                                });
                             } else {
                                 Log.e(TAG_NOTIFICATION, "Failed to retrieve from Firestore item id: " + receivedItemId);
                             }

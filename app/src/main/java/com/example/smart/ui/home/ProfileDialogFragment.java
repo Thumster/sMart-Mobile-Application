@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.example.smart.MainActivity;
 import com.example.smart.R;
+import com.example.smart.model.enums.Enums;
 import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -52,18 +53,6 @@ public class ProfileDialogFragment extends DialogFragment {
     private static final String TAG = "PROFILE_DIALOG_FRAGMENT";
 
     public ProfileDialogFragment() {
-    }
-
-    public enum SHOPPING_HABITS_ENUM {
-        SAVER,
-        MODERATE,
-        QUALITY;
-    }
-
-    public enum RECOMMENDATION_ENUM {
-        MIN,
-        HOUR,
-        DAY;
     }
 
     Button buttonLogout;
@@ -92,21 +81,21 @@ public class ProfileDialogFragment extends DialogFragment {
             if (task.isSuccessful()) {
                 DocumentSnapshot snapshot = task.getResult();
                 Map<String, Object> map = snapshot.getData();
-                SHOPPING_HABITS_ENUM habit;
+                Enums.SHOPPING_HABITS_ENUM habit;
                 try {
-                    habit = SHOPPING_HABITS_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_HABIT));
+                    habit = Enums.SHOPPING_HABITS_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_HABIT));
                     Log.e(TAG, "RETRIEVED RESULT HABIT: " + habit);
                     if (habit == null) throw new Exception();
                 } catch (Exception ex) {
-                    habit = SHOPPING_HABITS_ENUM.MODERATE;
+                    habit = Enums.SHOPPING_HABITS_ENUM.MODERATE;
                 }
-                RECOMMENDATION_ENUM recommendation_interval;
+                Enums.RECOMMENDATION_ENUM recommendation_interval;
                 try {
-                    recommendation_interval = RECOMMENDATION_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_RECOMMENDATION));
+                    recommendation_interval = Enums.RECOMMENDATION_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_RECOMMENDATION));
                     Log.e(TAG, "RETRIEVED RESULT RECOMMENDATION: " + recommendation_interval);
                     if (recommendation_interval == null) throw new Exception();
                 } catch (Exception ex) {
-                    recommendation_interval = RECOMMENDATION_ENUM.MIN;
+                    recommendation_interval = Enums.RECOMMENDATION_ENUM.MIN;
                 }
 
                 switch (habit) {
@@ -152,33 +141,33 @@ public class ProfileDialogFragment extends DialogFragment {
                         int shoppingRadioId = rgShoppingHabits.getCheckedRadioButtonId();
                         int recommendationRadioId = rgRecommendations.getCheckedRadioButtonId();
 
-                        SHOPPING_HABITS_ENUM selectedShoppingHabit;
-                        RECOMMENDATION_ENUM selectedRecommendation;
+                        Enums.SHOPPING_HABITS_ENUM selectedShoppingHabit;
+                        Enums.RECOMMENDATION_ENUM selectedRecommendation;
                         switch (shoppingRadioId) {
                             case R.id.radio_shopping_0:
-                                selectedShoppingHabit = SHOPPING_HABITS_ENUM.SAVER;
+                                selectedShoppingHabit = Enums.SHOPPING_HABITS_ENUM.SAVER;
                                 break;
                             case R.id.radio_shopping_1:
-                                selectedShoppingHabit = SHOPPING_HABITS_ENUM.MODERATE;
+                                selectedShoppingHabit = Enums.SHOPPING_HABITS_ENUM.MODERATE;
                                 break;
                             case R.id.radio_shopping_2:
-                                selectedShoppingHabit = SHOPPING_HABITS_ENUM.QUALITY;
+                                selectedShoppingHabit = Enums.SHOPPING_HABITS_ENUM.QUALITY;
                                 break;
                             default:
-                                selectedShoppingHabit = SHOPPING_HABITS_ENUM.MODERATE;
+                                selectedShoppingHabit = Enums.SHOPPING_HABITS_ENUM.MODERATE;
                         }
                         switch (recommendationRadioId) {
                             case R.id.radio_recommendation_0:
-                                selectedRecommendation = RECOMMENDATION_ENUM.MIN;
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.MIN;
                                 break;
                             case R.id.radio_recommendation_1:
-                                selectedRecommendation = RECOMMENDATION_ENUM.HOUR;
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.HOUR;
                                 break;
                             case R.id.radio_recommendation_2:
-                                selectedRecommendation = RECOMMENDATION_ENUM.DAY;
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.DAY;
                                 break;
                             default:
-                                selectedRecommendation = RECOMMENDATION_ENUM.MIN;
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.MIN;
                         }
                         Map<String, Object> data = new HashMap<>();
                         data.put(FirebaseUtil.USER_PROFILE_HABIT, selectedShoppingHabit.toString());
