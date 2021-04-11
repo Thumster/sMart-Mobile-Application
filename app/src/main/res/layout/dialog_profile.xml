@@ -101,7 +101,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        android:checked="false"
+        android:checked="true"
         app:layout_constraintTop_toTopOf="@id/profile_header_recommendations"
         app:layout_constraintBottom_toBottomOf="@id/profile_header_recommendations"/>
 
