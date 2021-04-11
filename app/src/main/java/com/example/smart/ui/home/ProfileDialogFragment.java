@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -58,6 +60,7 @@ public class ProfileDialogFragment extends DialogFragment {
     Button buttonLogout;
     RadioGroup rgShoppingHabits;
     RadioGroup rgRecommendations;
+    SwitchMaterial buttonRecommendationSwitch;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -65,6 +68,7 @@ public class ProfileDialogFragment extends DialogFragment {
         rgShoppingHabits = view.findViewById(R.id.radioGroup_shopping_habits);
         rgRecommendations = view.findViewById(R.id.radioGroup_recommendation);
         buttonLogout = view.findViewById(R.id.button_logout);
+        buttonRecommendationSwitch = view.findViewById(R.id.button_recommendation_switch);
         buttonLogout.setOnClickListener(v -> {
                     AuthUI.getInstance()
                             .signOut(v.getContext())
@@ -83,16 +87,16 @@ public class ProfileDialogFragment extends DialogFragment {
                 Map<String, Object> map = snapshot.getData();
                 Enums.SHOPPING_HABITS_ENUM habit;
                 try {
-                    habit = Enums.SHOPPING_HABITS_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_HABIT));
-                    Log.e(TAG, "RETRIEVED RESULT HABIT: " + habit);
+                    habit = Enums.SHOPPING_HABITS_ENUM.valueOf((String) map.get(FirebaseUtil.USER_PROFILE_HABIT));
+                    Log.i(TAG, "RETRIEVED RESULT HABIT: " + habit);
                     if (habit == null) throw new Exception();
                 } catch (Exception ex) {
                     habit = Enums.SHOPPING_HABITS_ENUM.MODERATE;
                 }
                 Enums.RECOMMENDATION_ENUM recommendation_interval;
                 try {
-                    recommendation_interval = Enums.RECOMMENDATION_ENUM.valueOf((String)map.get(FirebaseUtil.USER_PROFILE_RECOMMENDATION));
-                    Log.e(TAG, "RETRIEVED RESULT RECOMMENDATION: " + recommendation_interval);
+                    recommendation_interval = Enums.RECOMMENDATION_ENUM.valueOf((String) map.get(FirebaseUtil.USER_PROFILE_RECOMMENDATION));
+                    Log.i(TAG, "RETRIEVED RESULT RECOMMENDATION: " + recommendation_interval);
                     if (recommendation_interval == null) throw new Exception();
                 } catch (Exception ex) {
                     recommendation_interval = Enums.RECOMMENDATION_ENUM.MIN;
@@ -114,6 +118,9 @@ public class ProfileDialogFragment extends DialogFragment {
                 }
 
                 switch (recommendation_interval) {
+                    case ALL:
+                        rgRecommendations.check(R.id.radio_recommendation_3);
+                        break;
                     case MIN:
                         rgRecommendations.check(R.id.radio_recommendation_0);
                         break;
@@ -123,13 +130,19 @@ public class ProfileDialogFragment extends DialogFragment {
                     case DAY:
                         rgRecommendations.check(R.id.radio_recommendation_2);
                         break;
+                    case OFF:
+                        buttonRecommendationSwitch.setChecked(false);
+                        break;
                     default:
-                        rgRecommendations.check(R.id.radio_recommendation_0);
+                        rgRecommendations.check(R.id.radio_recommendation_1);
                         break;
                 }
             } else {
                 Log.e(TAG, "Failed to retrieve from Firestore...");
             }
+        });
+        buttonRecommendationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            switchBetweenRecommendation(isChecked);
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -166,8 +179,11 @@ public class ProfileDialogFragment extends DialogFragment {
                             case R.id.radio_recommendation_2:
                                 selectedRecommendation = Enums.RECOMMENDATION_ENUM.DAY;
                                 break;
+                            case R.id.radio_recommendation_3:
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.ALL;
+                                break;
                             default:
-                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.MIN;
+                                selectedRecommendation = Enums.RECOMMENDATION_ENUM.OFF;
                         }
                         Map<String, Object> data = new HashMap<>();
                         data.put(FirebaseUtil.USER_PROFILE_HABIT, selectedShoppingHabit.toString());
@@ -194,9 +210,21 @@ public class ProfileDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    private void toastMessage(String message) {
-        getActivity().runOnUiThread(() -> {
-            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-        });
+    private void switchBetweenRecommendation(Boolean isOn) {
+        if (isOn) {
+            for (int i = 0; i < rgRecommendations.getChildCount(); i++) {
+                RadioButton radioButton = (RadioButton) rgRecommendations.getChildAt(i);
+                radioButton.setEnabled(true);
+            }
+            if (rgRecommendations.getCheckedRadioButtonId() == -1) {
+                ((RadioButton) rgRecommendations.getChildAt(0)).setChecked(true);
+            }
+        } else {
+            for (int i = 0; i < rgRecommendations.getChildCount(); i++) {
+                RadioButton radioButton = (RadioButton) rgRecommendations.getChildAt(i);
+                radioButton.setChecked(false);
+                radioButton.setEnabled(false);
+            }
+        }
     }
 }

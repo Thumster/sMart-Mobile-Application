@@ -96,6 +96,15 @@
         app:layout_constraintTop_toBottomOf="@id/radioGroup_shopping_habits"
         android:text="Recommendation Interval" />
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/button_recommendation_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:checked="false"
+        app:layout_constraintTop_toTopOf="@id/profile_header_recommendations"
+        app:layout_constraintBottom_toBottomOf="@id/profile_header_recommendations"/>
+
     <View
         android:id="@+id/divider_2"
         android:layout_width="match_parent"
@@ -116,6 +125,16 @@
         app:layout_constraintTop_toBottomOf="@id/divider_2">
 
         <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio_recommendation_3"
+            style="@style/CustomRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:text="All"
+            android:textAlignment="center" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/radio_recommendation_0"
             style="@style/CustomRadioButton"
             android:layout_width="wrap_content"
@@ -130,11 +149,10 @@
             style="@style/CustomRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginRight="5dp"
-            android:textAlignment="center"
+            android:layout_weight="1"
             android:text="1 Hour"
-            android:checked="false" />
+            android:textAlignment="center" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/radio_recommendation_2"
@@ -142,7 +160,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:checked="false"
             android:text="1 Day"
             android:textAlignment="center" />
     </RadioGroup>

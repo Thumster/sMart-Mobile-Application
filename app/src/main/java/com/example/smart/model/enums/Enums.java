@@ -9,9 +9,11 @@ public class Enums {
     }
 
     public enum RECOMMENDATION_ENUM {
+        ALL(0),
         MIN((5 * 60000)),
         HOUR((60 * 60000)),
-        DAY((1440 * 60000));
+        DAY((1440 * 60000)),
+        OFF(Long.MAX_VALUE);
 
         private long milliseconds;
 

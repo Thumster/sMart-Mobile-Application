@@ -128,7 +128,8 @@ public class MainActivity extends AppCompatActivity
                                     }
                                     Date dateRecommendationReceived = new Date();
                                     Date recommendationsAfterThisDate = new Date(dateRecommendationReceived.getTime() - recommendation_interval.getMilliseconds());
-                                    Log.i(TAG, "\n\tRECOMMENDATION TYPE: " + recommendation_interval + "\n\tLOOK FOR RECOMMENDATIONS AFTER DATE: " + recommendationsAfterThisDate);
+                                    Log.i(TAG, "\n\tRECOMMENDATION TYPE: " + recommendation_interval +
+                                            "\n\tLOOK FOR RECOMMENDATIONS AFTER DATE: " + recommendationsAfterThisDate);
                                     Query query = FirebaseUtil.getUserDocRef().collection(FirebaseUtil.USER_RECOMMENDATION_HISTORY_COLLECTION_NAME)
                                             .whereEqualTo("itemId", receivedItemId)
                                             .orderBy("recommendationDateTime", Query.Direction.DESCENDING)
