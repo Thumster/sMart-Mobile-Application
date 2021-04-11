@@ -59,9 +59,23 @@
                     android:text="@string/button_redirect_shop"
                     app:layout_constraintVertical_chainStyle="packed"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@id/empty_text"
+                    app:layout_constraintEnd_toStartOf="@id/button_checkout"
                     app:layout_constraintStart_toStartOf="@id/empty_text"
                     app:layout_constraintTop_toBottomOf="@+id/empty_text" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_checkout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_checkout"
+                    android:layout_marginLeft="10dp"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/dark_green_variant"
+                    app:layout_constraintBottom_toBottomOf="@+id/button_redirect_items"
+                    app:layout_constraintEnd_toEndOf="@id/empty_text"
+                    app:layout_constraintStart_toEndOf="@id/button_redirect_items"
+                    app:layout_constraintTop_toTopOf="@+id/button_redirect_items"
+                    app:layout_constraintVertical_chainStyle="packed" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

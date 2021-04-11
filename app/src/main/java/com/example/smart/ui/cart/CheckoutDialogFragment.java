@@ -73,17 +73,15 @@ public class CheckoutDialogFragment extends DialogFragment {
                 List<CartItem> cartItems = receiptItemAdapter.getListOfCartItems();
                 Transaction transaction = new Transaction(cartItems);
                 colRef.add(transaction);
-                checkoutDialogListener.onCheckout(cartItems);
 
                 // STOP SHOPPING HERE
                 DocumentReference cartDocRef = FirebaseUtil.getCartsRef().document(FirebaseUtil.getCurrentUserCartId());
                 Map<String, Object> updates = new HashMap<>();
                 updates.put(FirebaseUtil.CART_USER_DOC_NAME, FieldValue.delete());
-
-                FirebaseUtil.setCurrentUserCartId(null);
-                FirebaseUtil.setIsCurrentlyShopping(false);
-
                 cartDocRef.update(updates);
+
+                checkoutDialogListener.onCheckout(cartItems);
+
 
 
                 Toast.makeText(getContext(), "Successful Checkout", Toast.LENGTH_LONG).show();

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -37,6 +38,7 @@ import com.example.smart.R;
 import com.example.smart.model.CartItem;
 import com.example.smart.model.response.InitNavigateResponseVO;
 import com.example.smart.model.response.PathResponseVO;
+import com.example.smart.ui.cart.CheckoutDialogFragment;
 import com.example.smart.util.ApiUtilService;
 import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
@@ -110,6 +112,7 @@ public class HomeFragment extends Fragment
     ConstraintLayout layoutItemView;
     ConstraintLayout layoutEmptyItemView;
     Button buttonRedirect;
+    Button buttonCheckout;
     Button buttonItemPrev;
     Button buttonItemNext;
     TextView textViewEmpty;
@@ -162,6 +165,7 @@ public class HomeFragment extends Fragment
         layoutItemView = root.findViewById(R.id.item_view);
         layoutEmptyItemView = root.findViewById(R.id.empty_item_view);
         buttonRedirect = root.findViewById(R.id.button_redirect_items);
+        buttonCheckout = root.findViewById(R.id.button_checkout);
         buttonItemPrev = root.findViewById(R.id.button_previous_item);
         buttonItemNext = root.findViewById(R.id.button_next_item);
         textViewEmpty = root.findViewById(R.id.empty_text);
@@ -249,6 +253,44 @@ public class HomeFragment extends Fragment
             view.invalidate();
         });
 
+        buttonCheckout.setOnClickListener(v -> {
+            if (!mSnapshots.isEmpty()) {
+                Query query = FirebaseUtil.getUserCartItemsRef().whereGreaterThan("quantityInCart", 0);
+                CheckoutDialogFragment checkoutDialog = new CheckoutDialogFragment(new CheckoutDialogFragment.CheckoutDialogListener() {
+                    @Override
+                    public void onCheckout(List<CartItem> purchasedCartItems) {
+                        itemsQuery.get().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                FirebaseUtil.setCurrentUserCartId(null);
+                                FirebaseUtil.setIsCurrentlyShopping(false);
+                                List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
+                                for (DocumentSnapshot snapshot : snapshots) {
+                                    CartItem cartItem = snapshot.toObject(CartItem.class);
+                                    purchasedCartItems.stream()
+                                            .filter(item -> item.getId().equals(cartItem.getId()))
+                                            .findFirst()
+                                            .ifPresent(foundItem -> {
+                                                Integer newQuantity = cartItem.getQuantity() - foundItem.getQuantityInCart();
+                                                if (newQuantity > 0) {
+                                                    cartItem.setQuantity(newQuantity);
+                                                    cartItem.setQuantityInCart(0);
+                                                    snapshot.getReference().set(cartItem);
+                                                } else {
+                                                    snapshot.getReference().delete();
+                                                }
+                                            });
+                                    onDataChanged();
+                                }
+                            }
+                        });
+                    }
+                }, query);
+                checkoutDialog.show(getFragmentManager(), TAG);
+            } else {
+                Toast.makeText(getContext(), "No items detected in physical cart!", Toast.LENGTH_LONG).show();
+            }
+        });
+
         return root;
     }
 
@@ -264,12 +306,19 @@ public class HomeFragment extends Fragment
                 String changeCartId = snapshot.getId();
                 String currentUserCartId = FirebaseUtil.getCurrentUserCartId();
 
+
                 Object changeUserIdObject = snapshot.get(FirebaseUtil.CART_USER_DOC_NAME);
                 String changeUserId = null;
                 if (changeUserIdObject != null) {
                     changeUserId = (String) changeUserIdObject;
                 }
                 String currentUserId = FirebaseUtil.getCurrentUserUid();
+
+                Log.i(TAG, "CART CHANGE DETECTED!" +
+                        "\n\tCHANGE CART ID: " + changeCartId +
+                        "\n\tCURRENT CART ID: " +  currentUserCartId +
+                        "\n\tCHANGE USER ID: " + changeUserId +
+                        "\n\tCURRENT USER ID: " + currentUserId);
 
                 switch (change.getType()) {
                     case ADDED:
@@ -288,6 +337,8 @@ public class HomeFragment extends Fragment
                         }
                         break;
                 }
+                Log.i(TAG, "CART UPDATES" +
+                        "\n\tUPDATED CART ID: " + FirebaseUtil.getCurrentUserCartId());
             }
         });
     }
@@ -328,9 +379,11 @@ public class HomeFragment extends Fragment
         if (mSnapshots.isEmpty()) {
             textViewEmpty.setText("No Items Found in Your Shopping List");
             buttonRedirect.setText("Shop Now");
+            buttonCheckout.setVisibility(View.GONE);
         } else {
             textViewEmpty.setText("Shopping List Complete");
             buttonRedirect.setText("Shop More");
+            buttonCheckout.setVisibility(View.VISIBLE);
         }
         if (validCartItems.isEmpty()) {
             layoutEmptyItemView.setVisibility(View.VISIBLE);
@@ -505,6 +558,8 @@ public class HomeFragment extends Fragment
 
     private void updateCartToRegistered(String cartId) {
         Boolean register = cartId != null;
+        Log.e(TAG, "\n\tUpdating cart registration: " + register);
+        Log.e(TAG, "\n\tUpdating cart registration for cart ID: " + cartId);
         FirebaseUtil.setCurrentUserCartId(cartId);
         FirebaseUtil.setIsCurrentlyShopping(register);
         onCartFound(register);

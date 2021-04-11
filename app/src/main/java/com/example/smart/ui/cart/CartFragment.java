@@ -160,6 +160,9 @@ public class CartFragment extends Fragment implements
                                 public void onCheckout(List<CartItem> purchasedCartItems) {
                                     cartColRef.get().addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
+                                            FirebaseUtil.setCurrentUserCartId(null);
+                                            FirebaseUtil.setIsCurrentlyShopping(false);
+                                            onCartFound(FirebaseUtil.getIsCurrentlyShopping());
                                             List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
                                             for (DocumentSnapshot snapshot : snapshots) {
                                                 CartItem cartItem = snapshot.toObject(CartItem.class);
@@ -235,6 +238,8 @@ public class CartFragment extends Fragment implements
                     if (task.isSuccessful()) {
                         Log.i(TAG, "Successfully unregistered cart");
                         onCartFound(false);
+                        FirebaseUtil.setCurrentUserCartId(null);
+                        FirebaseUtil.setIsCurrentlyShopping(false);
                         Toast.makeText(getContext(), "Successfully unregistered cart!", Toast.LENGTH_LONG)
                                 .show();
                     } else {
