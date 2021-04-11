@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity
                                             recommendation_interval = Enums.RECOMMENDATION_ENUM.MIN;
                                         }
                                     }
+                                    if (recommendation_interval == Enums.RECOMMENDATION_ENUM.OFF) {
+                                        return;
+                                    }
                                     Date dateRecommendationReceived = new Date();
                                     Date recommendationsAfterThisDate = new Date(dateRecommendationReceived.getTime() - recommendation_interval.getMilliseconds());
                                     Log.i(TAG, "\n\tRECOMMENDATION TYPE: " + recommendation_interval +

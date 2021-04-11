@@ -189,6 +189,10 @@ public class ProfileDialogFragment extends DialogFragment {
                         data.put(FirebaseUtil.USER_PROFILE_HABIT, selectedShoppingHabit.toString());
                         data.put(FirebaseUtil.USER_PROFILE_RECOMMENDATION, selectedRecommendation.toString());
 
+                        Log.i(TAG, "SAVING DATA INTO FIRESTORE: " +
+                                "\n\tSHOPPING HABIT: " + selectedShoppingHabit +
+                                "\n\tRECOMMENDATION: " + selectedRecommendation);
+
                         userDocRef.set(data, SetOptions.merge()).addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Log.i(TAG, "Successful write of profile to Firestore");
@@ -225,6 +229,7 @@ public class ProfileDialogFragment extends DialogFragment {
                 radioButton.setChecked(false);
                 radioButton.setEnabled(false);
             }
+            rgRecommendations.clearCheck();
         }
     }
 }
