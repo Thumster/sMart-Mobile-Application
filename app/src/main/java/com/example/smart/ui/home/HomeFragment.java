@@ -5,18 +5,23 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -36,6 +41,7 @@ import com.estimote.indoorsdk_module.cloud.LocationPosition;
 import com.example.smart.MainActivity;
 import com.example.smart.R;
 import com.example.smart.model.CartItem;
+import com.example.smart.model.response.CoordsVO;
 import com.example.smart.model.response.InitNavigateResponseVO;
 import com.example.smart.model.response.PathResponseVO;
 import com.example.smart.ui.cart.CheckoutDialogFragment;
@@ -89,15 +95,10 @@ public class HomeFragment extends Fragment
     ApiUtilService apiService;
 
     private final int TABLE_LENGTH = 3;
-    private final int TABLE_WIDTH = 10;
+    private final int TABLE_WIDTH = 12;
     private final int DISTANCE_FROM_MAIN_DOOR = 8;
     private final int DISTANCE_BETWEEN_TABLE_IN_LENGTH = 4;
     private final int DISTANCE_BETWEEN_TABLE_IN_WIDTH = 28 - 2 * TABLE_WIDTH;
-
-
-    // @WK - Manipulate these vars - for next and previous buttons on item selection
-    private Integer currX = 0;
-    private Integer currY = 0;
 
     private double pixelsPerUnitWidth;
     private double pixelsPerUnitLength;
@@ -123,15 +124,15 @@ public class HomeFragment extends Fragment
     TextView textViewItemPrice;
     TextView textViewItemQuantity;
 
-    Location location;
-    // TextView coordinateTextView;
-    // IndoorLocationView indoorLocationView;
+    Location location; // The actual location, i.e., Lab
     ScanningIndoorLocationManager indoorLocationManager;
-    LocationPosition currentPosition;
+    LocationPosition currentPosition; // User's current position
 
     Paint wallPaint = new Paint(); // Stores how to draw, e.g., color, style, line thickness, text size, etc
     Paint tablePaint = new Paint();
     Paint personPaint = new Paint();
+    Paint pathPaint = new Paint();
+    Paint destPaint = new Paint();
 
     Rect wallRectangle = new Rect(); // Rectangle
     Rect tableRectangle = new Rect(); // Rectangle
@@ -151,9 +152,9 @@ public class HomeFragment extends Fragment
                 .build();
         apiService = retrofit.create(ApiUtilService.class);
 
-        Integer originX = 0;
-        Integer originY = 0;
-        callApiInitNavigate(originX, originY);
+//        Integer originX = 28;
+//        Integer originY = 0;
+//        callApiInitNavigate(originX, originY);
 
         notShoppingLayout = root.findViewById(R.id.layout_not_shopping);
         shoppingLayout = root.findViewById(R.id.layout_shopping);
@@ -177,8 +178,14 @@ public class HomeFragment extends Fragment
         textViewItemQuantity = root.findViewById(R.id.in_shop_quantity);
 
         imageViewIndoorMap = root.findViewById(R.id.image_view_indoor_map);
-        // indoorLocationView = (IndoorLocationView) root.findViewById(R.id.indoorLocationView);
-        // coordinateTextView = (TextView) root.findViewById(R.id.coordinateTextView);
+
+        wallPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.black, null));
+        tablePaint.setColor(ResourcesCompat.getColor(getResources(), R.color.dark_green_variant, null));
+        personPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.light_blue, null));
+        pathPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.orange, null));
+        destPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.dark_red, null));
+        destPaint.setStrokeWidth(10);
+        destPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
         FirebaseUtil.startListening(this);
@@ -200,58 +207,15 @@ public class HomeFragment extends Fragment
             onDataChanged();
         });
 
-        imageViewIndoorMap.setOnClickListener(view -> {
-            // A bitmap configuration describes how pixels are stored.
-            bitmapIndoorMap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            imageViewIndoorMap.setImageBitmap(bitmapIndoorMap);
-            canvasIndoorMap = new Canvas(bitmapIndoorMap); // Drawing on the canvas draws on the bitmap.
+        Handler handler = new Handler();
+        Runnable r = () -> {
+            Log.i("onCreateView() Width", Double.toString(imageViewIndoorMap.getWidth()));
+            Log.i("onCreateView() Height", Double.toString(imageViewIndoorMap.getHeight()));
 
-            pixelsPerUnitWidth = view.getWidth() / 28.00;
-            pixelsPerUnitLength = view.getHeight() / 37.00;
-
-            // Log.i("Width", Integer.toString(view.getWidth()));
-            // Log.i("Pixels Per Unit Width", Double.toString(pixelsPerUnitWidth));
-            // Log.i("Height", Integer.toString(view.getHeight()));
-            // Log.i("Pixels Per Unit Length", Double.toString(pixelsPerUnitLength));
-
-            wallPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.black, null));
-            tablePaint.setColor(ResourcesCompat.getColor(getResources(), R.color.dark_green_variant, null));
-            personPaint.setColor(ResourcesCompat.getColor(getResources(), R.color.light_blue, null));
-
-            wallRectangle.set(0, 0, (int) (TABLE_WIDTH * pixelsPerUnitWidth), (int) (DISTANCE_FROM_MAIN_DOOR * pixelsPerUnitLength));
-            canvasIndoorMap.drawRect(wallRectangle, wallPaint);
-
-            for (int i = 0; i < 4; i++) {
-                tableRectangle.set(
-                        0,
-                        (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
-                        (int) (TABLE_WIDTH * pixelsPerUnitWidth),
-                        (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
-                );
-                canvasIndoorMap.drawRect(tableRectangle, tablePaint);
-            }
-
-            for (int i = 0; i < 4; i++) {
-                tableRectangle.set(
-                        (int) ((TABLE_WIDTH + DISTANCE_BETWEEN_TABLE_IN_WIDTH) * pixelsPerUnitWidth),
-                        (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
-                        view.getWidth(),
-                        (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
-                );
-                canvasIndoorMap.drawRect(tableRectangle, tablePaint);
-            }
-
-            if (currentPosition != null) {
-                float currentX = (float) (currentPosition.getX() * pixelsPerUnitWidth);
-                float currentY = (float) ((9.28 - currentPosition.getY()) * pixelsPerUnitLength);
-                canvasIndoorMap.drawCircle(currentX / 0.25f, currentY / 0.25f, (float) (view.getWidth() / 30), personPaint);
-
-                // Log.i("Current X", Float.toString(currentX / 0.25f));
-                // Log.i("Current Y", Float.toString(currentY / 0.25f));
-            }
-
-            view.invalidate();
-        });
+            setupIndoorLayout();
+            updateNavigationPath();
+        };
+        handler.postDelayed(r, 3000);
 
         buttonCheckout.setOnClickListener(v -> {
             if (!mSnapshots.isEmpty()) {
@@ -401,7 +365,6 @@ public class HomeFragment extends Fragment
         }
         currentCartItem = validCartItems.get(currentItemIdx);
 
-
         if (currentCartItem == null) {
             return;
         }
@@ -416,8 +379,58 @@ public class HomeFragment extends Fragment
         textViewItemPrice.setText(String.format("$%.2f", currentCartItem.getPrice()));
         textViewItemQuantity.setText(String.format("%d / %d", currentCartItem.getQuantityInCart(), currentCartItem.getQuantity()));
 
-        // @WK - calling the path update here
-        callApiRefreshPath(currX, currY, currentCartItem.getId().getId());
+        if (imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
+            Log.i("onDataChanged() Width", Double.toString(imageViewIndoorMap.getWidth()));
+            Log.i("onDataChanged() Height", Double.toString(imageViewIndoorMap.getHeight()));
+
+            setupIndoorLayout();
+            updateNavigationPath();
+        }
+    }
+
+    private void setupIndoorLayout() {
+        // A bitmap configuration describes how pixels are stored.
+        bitmapIndoorMap = Bitmap.createBitmap(imageViewIndoorMap.getWidth(), imageViewIndoorMap.getHeight(), Bitmap.Config.ARGB_8888);
+        imageViewIndoorMap.setImageBitmap(bitmapIndoorMap);
+        canvasIndoorMap = new Canvas(bitmapIndoorMap); // Drawing on the canvas draws on the bitmap.
+
+        pixelsPerUnitWidth = imageViewIndoorMap.getWidth() / 28.00;
+        pixelsPerUnitLength = imageViewIndoorMap.getHeight() / 37.00;
+
+        wallRectangle.set(0, 0, (int) (TABLE_WIDTH * pixelsPerUnitWidth), (int) (DISTANCE_FROM_MAIN_DOOR * pixelsPerUnitLength));
+        canvasIndoorMap.drawRect(wallRectangle, wallPaint);
+
+        for (int i = 0; i < 4; i++) {
+            tableRectangle.set(
+                    0,
+                    (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
+                    (int) (TABLE_WIDTH * pixelsPerUnitWidth),
+                    (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
+            );
+            canvasIndoorMap.drawRect(tableRectangle, tablePaint);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            tableRectangle.set(
+                    (int) ((TABLE_WIDTH + DISTANCE_BETWEEN_TABLE_IN_WIDTH) * pixelsPerUnitWidth),
+                    (int) ((DISTANCE_FROM_MAIN_DOOR + (DISTANCE_BETWEEN_TABLE_IN_LENGTH + TABLE_LENGTH) * i) * pixelsPerUnitLength),
+                    imageViewIndoorMap.getWidth(),
+                    (int) ((DISTANCE_FROM_MAIN_DOOR + ((i + 1) * TABLE_LENGTH + i * DISTANCE_BETWEEN_TABLE_IN_LENGTH)) * pixelsPerUnitLength)
+            );
+            canvasIndoorMap.drawRect(tableRectangle, tablePaint);
+        }
+    }
+
+    private void updateNavigationPath() {
+        if (currentPosition != null) {
+            int scaledCurrentX = (int) (currentPosition.getX() / 0.25);
+            int scaledCurrentY =  37 - (int) (currentPosition.getY() / 0.25);
+
+            Log.i("Raw Current Position", "(" + currentPosition.getX() + ", " + currentPosition.getY() + ")");
+            Log.i("Modified Current Position", "(" + scaledCurrentX + ", " + scaledCurrentY + ")");
+
+            callApiRefreshPath(scaledCurrentX, scaledCurrentY, currentCartItem.getId().getId());
+        }
     }
 
     private void onDocumentAdded(DocumentChange change) {
@@ -437,6 +450,7 @@ public class HomeFragment extends Fragment
         mSnapshots.remove(change.getOldIndex());
     }
 
+    // Init to update the sortIdxes on Firestore
     private void callApiInitNavigate(int posX, int posY) {
         Call<InitNavigateResponseVO> call = apiService.initNavigate(0, 0, FirebaseUtil.getCurrentUserUid());
         call.enqueue(new Callback<InitNavigateResponseVO>() {
@@ -445,7 +459,7 @@ public class HomeFragment extends Fragment
                 if (response.isSuccessful()) {
                     InitNavigateResponseVO initNavigateResponseVO = response.body();
                     if (initNavigateResponseVO.getStatus() > 0) {
-                        Log.i("RECEIVED RESULT", initNavigateResponseVO.getStatus().toString());
+                        Log.i("callApiInitNavigate() RECEIVED RESULT", initNavigateResponseVO.getStatus().toString());
                     } else {
                         Log.e("Failed to init navigation from API. RECEIVED FAILED RESULT", initNavigateResponseVO.getStatus().toString());
                     }
@@ -466,9 +480,41 @@ public class HomeFragment extends Fragment
             public void onResponse(Call<PathResponseVO> call, Response<PathResponseVO> response) {
                 if (response.isSuccessful()) {
                     PathResponseVO pathResponseVO = response.body();
-                    Log.i("RECEIVED RESULT", pathResponseVO.getItem());
+                    List<CoordsVO> coords = pathResponseVO.getPath();
 
-                    //@WK - call whatever u need to with the received result here [PATH]
+                    Log.i("callApiRefreshPath", pathResponseVO.getItem());
+
+                    // Formula: position * pixels per unit dimension
+                    float currentX = (float) (coords.get(0).getPosX() * pixelsPerUnitWidth);
+                    float currentY = (float) (coords.get(0).getPosY() * pixelsPerUnitLength);
+                    canvasIndoorMap.drawCircle(currentX, currentY, (float) (imageViewIndoorMap.getWidth() / 45), personPaint);
+
+                    for (int i = 1; i < coords.size() - 1; i++) {
+                        CoordsVO coord = coords.get(i);
+                        float pathX = (float) (coord.getPosX() * pixelsPerUnitWidth);
+                        float pathY = (float) (coord.getPosY() * pixelsPerUnitLength);
+
+                        canvasIndoorMap.drawCircle(pathX, pathY, (float) (imageViewIndoorMap.getWidth() / 60), pathPaint);
+
+                        Log.i("Coordinate", "(" + pathX + ", " + pathY + ")");
+                    }
+
+                    float destX = (float) (coords.get(coords.size() - 1).getPosX() * pixelsPerUnitWidth);
+                    float destY = (float) (coords.get(coords.size() - 1).getPosY() * pixelsPerUnitLength);
+
+                    Path path = new Path();
+                    path.moveTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
+                    path.lineTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
+                    path.close();
+                    canvasIndoorMap.drawPath(path, destPaint);
+
+                    path = new Path();
+                    path.moveTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
+                    path.lineTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
+                    path.close();
+                    canvasIndoorMap.drawPath(path, destPaint);
+
+                    imageViewIndoorMap.invalidate();
                 }
             }
 
@@ -489,41 +535,30 @@ public class HomeFragment extends Fragment
             @Override
             public void success(Location location) {
                 HomeFragment.this.location = location;
-
-                // indoorLocationView.setLocation(location);
                 indoorLocationManager = new IndoorLocationManagerBuilder(
                         getContext(),
                         location,
                         new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
                 ).withDefaultScanner()
-                        .build();
+                 .build();
 
                 indoorLocationManager.setOnPositionUpdateListener(new OnPositionUpdateListener() {
                     @Override
                     public void onPositionUpdate(@NotNull LocationPosition locationPosition) {
                         currentPosition = locationPosition;
-                        // indoorLocationView.updatePosition(locationPosition);
-
-                        // LocationPosition lp = new LocationPosition(7.05, 9.28, 0.00);
-                        // indoorLocationView.updatePosition(lp);
-
-                        // String position = "X: " + DECIMAL_FORMATTER.format(locationPosition.getX())
-                        //        + "; Y: " + DECIMAL_FORMATTER.format(locationPosition.getY())
-                        //        + "; O: " + locationPosition.getOrientation();
-
-                        // Log.i("onPositionUpdate", position);
-                        // coordinateTextView.setText(position);
                     }
 
                     @Override
                     public void onPositionOutsideLocation() {
-                        // indoorLocationView.hidePosition();
-                        // Log.i("onPositionOutsideLocation", "Outside...");
-                        // coordinateTextView.setText("Out of range");
+                        Log.i("onPositionOutsideLocation", "Out of BLE Beacon Range...");
                     }
                 });
 
                 indoorLocationManager.startPositioning();
+
+                int scaledOriginX = (int) (currentPosition.getX() / 0.25);
+                int scaledOriginY =  37 - (int) (currentPosition.getY() / 0.25);
+                callApiInitNavigate(scaledOriginX, scaledOriginY);
             }
 
             @Override
@@ -539,6 +574,7 @@ public class HomeFragment extends Fragment
             notShoppingLayout.setVisibility(View.GONE);
             shoppingLayout.setVisibility(View.VISIBLE);
             buttonQrCode.setVisibility(View.GONE);
+
             instantiateIndoorPositioning();
         } else {
             notShoppingLayout.setVisibility(View.VISIBLE);
