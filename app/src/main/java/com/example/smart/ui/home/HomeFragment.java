@@ -212,8 +212,10 @@ public class HomeFragment extends Fragment
             Log.i("onCreateView() Width", Double.toString(imageViewIndoorMap.getWidth()));
             Log.i("onCreateView() Height", Double.toString(imageViewIndoorMap.getHeight()));
 
-            setupIndoorLayout();
-            updateNavigationPath();
+            if (shoppingLayout.getVisibility() == View.VISIBLE && !validCartItems.isEmpty()) {
+                setupIndoorLayout();
+                updateNavigationPath();
+            }
         };
         handler.postDelayed(r, 3000);
 
@@ -379,7 +381,8 @@ public class HomeFragment extends Fragment
         textViewItemPrice.setText(String.format("$%.2f", currentCartItem.getPrice()));
         textViewItemQuantity.setText(String.format("%d / %d", currentCartItem.getQuantityInCart(), currentCartItem.getQuantity()));
 
-        if (imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
+        if (!validCartItems.isEmpty() && shoppingLayout.getVisibility() == View.VISIBLE && imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
+            Log.i("onDataChanged()", "Entering...");
             Log.i("onDataChanged() Width", Double.toString(imageViewIndoorMap.getWidth()));
             Log.i("onDataChanged() Height", Double.toString(imageViewIndoorMap.getHeight()));
 
@@ -452,7 +455,7 @@ public class HomeFragment extends Fragment
 
     // Init to update the sortIdxes on Firestore
     private void callApiInitNavigate(int posX, int posY) {
-        Call<InitNavigateResponseVO> call = apiService.initNavigate(0, 0, FirebaseUtil.getCurrentUserUid());
+        Call<InitNavigateResponseVO> call = apiService.initNavigate(posX, posY, FirebaseUtil.getCurrentUserUid());
         call.enqueue(new Callback<InitNavigateResponseVO>() {
             @Override
             public void onResponse(Call<InitNavigateResponseVO> call, Response<InitNavigateResponseVO> response) {
@@ -556,9 +559,16 @@ public class HomeFragment extends Fragment
 
                 indoorLocationManager.startPositioning();
 
-                int scaledOriginX = (int) (currentPosition.getX() / 0.25);
-                int scaledOriginY =  37 - (int) (currentPosition.getY() / 0.25);
-                callApiInitNavigate(scaledOriginX, scaledOriginY);
+                Handler handler = new Handler();
+                Runnable r = () -> {
+                    int scaledOriginX = (int) (currentPosition.getX() / 0.25);
+                    int scaledOriginY =  37 - (int) (currentPosition.getY() / 0.25);
+
+                    Log.i("initNav", "(" + scaledOriginX + ", " + scaledOriginY + ")");
+
+                    callApiInitNavigate(scaledOriginX, scaledOriginY);
+                };
+                handler.postDelayed(r, 1500);
             }
 
             @Override
