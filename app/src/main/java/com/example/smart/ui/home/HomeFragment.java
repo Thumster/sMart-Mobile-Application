@@ -561,12 +561,14 @@ public class HomeFragment extends Fragment
 
                 Handler handler = new Handler();
                 Runnable r = () -> {
-                    int scaledOriginX = (int) (currentPosition.getX() / 0.25);
-                    int scaledOriginY =  37 - (int) (currentPosition.getY() / 0.25);
+                    if (currentPosition != null) {
+                        int scaledOriginX = (int) (currentPosition.getX() / 0.25);
+                        int scaledOriginY = 37 - (int) (currentPosition.getY() / 0.25);
 
-                    Log.i("initNav", "(" + scaledOriginX + ", " + scaledOriginY + ")");
+                        Log.i("initNav", "(" + scaledOriginX + ", " + scaledOriginY + ")");
 
-                    callApiInitNavigate(scaledOriginX, scaledOriginY);
+                        callApiInitNavigate(scaledOriginX, scaledOriginY);
+                    }
                 };
                 handler.postDelayed(r, 1500);
             }
