@@ -35,8 +35,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/empty_item_view"
                 android:layout_width="match_parent"
-                android:visibility="gone"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/empty_text"
@@ -44,12 +44,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="No Items In Cart"
-                    app:layout_constraintVertical_chainStyle="packed"
                     android:textColor="@color/light_green"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintBottom_toTopOf="@id/button_redirect_items"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_redirect_items"
@@ -57,18 +57,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/button_redirect_shop"
-                    app:layout_constraintVertical_chainStyle="packed"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/button_checkout"
                     app:layout_constraintStart_toStartOf="@id/empty_text"
-                    app:layout_constraintTop_toBottomOf="@+id/empty_text" />
+                    app:layout_constraintTop_toBottomOf="@+id/empty_text"
+                    app:layout_constraintVertical_chainStyle="packed" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_checkout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_checkout"
                     android:layout_marginLeft="10dp"
+                    android:text="@string/button_checkout"
                     android:visibility="gone"
                     app:backgroundTint="@color/dark_green_variant"
                     app:layout_constraintBottom_toBottomOf="@+id/button_redirect_items"
@@ -205,14 +205,14 @@
         app:layout_anchor="@+id/fab_qr_code"
         app:layout_anchorGravity="center">
 
-<!--        <Button-->
-<!--            android:id="@+id/button_logout"-->
-<!--            style="@style/Widget.MaterialComponents.Button.TextButton"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/button_logout"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/button_logout"-->
+        <!--            style="@style/Widget.MaterialComponents.Button.TextButton"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="@string/button_logout"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_welcome"

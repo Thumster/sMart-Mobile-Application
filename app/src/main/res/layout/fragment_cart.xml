@@ -18,27 +18,26 @@
             style="@style/Theme.SMart.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
             android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            android:layout_marginVertical="10dp"
             tools:text="ID of Cart" />
 
         <ImageView
             android:id="@+id/button_unregister_cart"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            app:layout_constraintStart_toEndOf="@id/text_user_cart"
-            app:layout_constraintTop_toTopOf="@id/text_user_cart"
-            app:layout_constraintBottom_toBottomOf="@id/text_user_cart"
-            android:src="@drawable/ic_remove"
-            android:clickable="true"
-            android:visibility="gone"
             android:layout_marginLeft="8dp"
-            />
+            android:clickable="true"
+            android:src="@drawable/ic_remove"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/text_user_cart"
+            app:layout_constraintStart_toEndOf="@id/text_user_cart"
+            app:layout_constraintTop_toTopOf="@id/text_user_cart" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

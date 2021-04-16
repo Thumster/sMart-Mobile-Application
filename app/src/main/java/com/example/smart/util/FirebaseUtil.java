@@ -1,17 +1,7 @@
 package com.example.smart.util;
 
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
-import com.example.smart.model.CartItem;
-import com.example.smart.ui.home.QRDialogFragment;
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -19,13 +9,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
 public class FirebaseUtil {
-
-    private static final String TAG = "FIREBASEUTIL";
 
     public static final String ITEM_COLLECTION_NAME = "items";
     public static final String USER_COLLECTION_NAME = "users";
@@ -37,7 +24,7 @@ public class FirebaseUtil {
     public static final String USER_FMS_TOKEN = "fms_token";
     public static final String USER_PROFILE_HABIT = "profile_habit";
     public static final String USER_PROFILE_RECOMMENDATION = "profile_recommendation";
-
+    private static final String TAG = "FIREBASEUTIL";
     private static Boolean isCurrentlyShopping = false;
     private static String currentUserCartId;
 
@@ -87,10 +74,6 @@ public class FirebaseUtil {
         return user;
     }
 
-    public interface OnCartFound {
-        void onCartFound(Boolean found);
-    }
-
     public static void startListening(OnCartFound listener) {
         onCartFoundListener = listener;
     }
@@ -130,13 +113,13 @@ public class FirebaseUtil {
         });
     }
 
-    //==============================================================================================
-    //================================= GETTERS/SETTERS ============================================
-    //==============================================================================================
-
     public static String getCurrentUserCartId() {
         return FirebaseUtil.currentUserCartId;
     }
+
+    //==============================================================================================
+    //================================= GETTERS/SETTERS ============================================
+    //==============================================================================================
 
     public static void setCurrentUserCartId(String cartId) {
         FirebaseUtil.currentUserCartId = cartId;
@@ -157,13 +140,13 @@ public class FirebaseUtil {
         FirebaseUtil.isCurrentlyShopping = isCurrentlyShopping;
     }
 
-    //==============================================================================================
-    //================================= COLLECTION CALLS ===========================================
-    //==============================================================================================
-
     public static CollectionReference getItemsRef() {
         return getFirestore().collection(ITEM_COLLECTION_NAME);
     }
+
+    //==============================================================================================
+    //================================= COLLECTION CALLS ===========================================
+    //==============================================================================================
 
     public static CollectionReference getCartsRef() {
         return getFirestore().collection(CART_COLLECTION_NAME);
@@ -179,6 +162,10 @@ public class FirebaseUtil {
 
     public static DocumentReference getUserDocRef() {
         return getFirestore().collection(USER_COLLECTION_NAME).document(getCurrentUserUid());
+    }
+
+    public interface OnCartFound {
+        void onCartFound(Boolean found);
     }
 
 }

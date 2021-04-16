@@ -27,13 +27,6 @@
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 
-    <style name="Theme.SMart.PrimaryButton" parent="Widget.MaterialComponents.Button">
-        <item name="iconGravity">textStart</item>
-        <item name="background">@color/dark_green</item>
-        <item name="backgroundTint">@color/dark_green</item>
-        <item name="android:textColor">@color/white</item>
-    </style>
-
     <style name="Theme.SMart.SecondaryButton" parent="Widget.MaterialComponents.Button">
         <item name="iconGravity">textStart</item>
         <item name="background">@color/light_green_variant</item>
@@ -64,37 +57,6 @@
         <item name="android:textColor">@color/black</item>
     </style>
 
-    <style name="Theme.SMart.FormLabel">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">18dp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-    </style>
-
-    <style name="Theme.SMart.Divider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:background">#BDBDBD</item>
-    </style>
-
-    <style name="Theme.SMart.FilterIcon">
-        <item name="android:layout_width">30dp</item>
-        <item name="android:layout_height">30dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:layout_marginLeft">8dp</item>
-    </style>
-
-    <style name="Theme.SMart.FilterSpinner" parent="Base.Widget.AppCompat.Spinner.Underlined">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingBottom">16dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-    </style>
-
     <style name="Theme.SMart.Headline">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">20sp</item>
@@ -115,38 +77,6 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="Theme.SMart.Body2">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="Theme.SMart.Caption">
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="Theme.SMart.TextDivider">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">4dp</item>
-        <item name="android:layout_marginRight">4dp</item>
-        <item name="android:textColor">@color/light_green</item>
-    </style>
-
-    <style name="CustomWingInner">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:background">#FFFFFF</item>
-    </style>
-
-    <style name="CustomWingOuter">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_marginLeft">16dp</item>
-        <item name="android:layout_marginRight">16dp</item>
-    </style>
-
     <style name="FirebaseUI.sMartTheme" parent="FirebaseUI">
         <!-- Required for sign-in flow styling -->
         <item name="colorPrimary">@color/light_green</item>
@@ -164,29 +94,6 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="FirebaseUI.EditText">
-        <item name="android:paddingBottom">14dp</item>
-        <item name="android:paddingTop">14dp</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="colorControlActivated">@color/white</item>
-        <item name="colorControlHighlight">@color/white</item>
-        <item name="android:textColorHint">@color/white</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="colorAccent">@color/white</item>
-        <item name="colorControlNormal">@color/white</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white</item>
-    </style>
-
-    <style name="FirebaseUI.Text.TextInputLayout" parent="@style/FirebaseUI.EditText" />
-
-    <style name="FirebaseUI.Text.HintText" parent="@style/FirebaseUI.EditText" />
-
-    <style name="FirebaseUI.Text.Link">
-        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="Theme.SMart.FullScreenDialog">

@@ -1,29 +1,22 @@
 package com.example.smart.ui.home;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
 import com.example.smart.R;
 import com.example.smart.util.FirebaseUtil;
@@ -41,15 +34,8 @@ import java.util.Map;
 public class QRDialogFragment extends DialogFragment {
 
     private static final String TAG = "QR_DIALOG_FRAGMENT";
-
-    public interface QRDialogListener {
-        public void onScanResultListener(String cartId);
-    }
-
     private QRDialogListener qrDialogListener;
-
     private SurfaceView cameraView;
-
     private String detectedText = "";
 
     public QRDialogFragment(QRDialogListener qrDialogListener) {
@@ -181,5 +167,9 @@ public class QRDialogFragment extends DialogFragment {
             //deprecated in API 26
             vibrator.vibrate(500);
         }
+    }
+
+    public interface QRDialogListener {
+        public void onScanResultListener(String cartId);
     }
 }

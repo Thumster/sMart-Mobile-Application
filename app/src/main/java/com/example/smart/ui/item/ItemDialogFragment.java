@@ -16,19 +16,6 @@ import com.example.smart.R;
 import com.example.smart.model.Item;
 
 public class ItemDialogFragment extends DialogFragment {
-    public interface ItemDialogListener {
-        public void onDialogConfirmAdd(Item item, Integer quantity);
-    }
-    private Item item;
-    private Integer quantity;
-    private ItemDialogListener itemDialogListener;
-
-    public ItemDialogFragment(ItemDialogFragment.ItemDialogListener listener, Item item) {
-        itemDialogListener = listener;
-        this.quantity = 1;
-        this.item = item;
-    }
-
     ImageView closeView;
     ImageView imageView;
     TextView nameText;
@@ -41,8 +28,15 @@ public class ItemDialogFragment extends DialogFragment {
     Button plusButton;
     TextView quantityText;
     TextView totalPriceText;
-
     Button addToCartButton;
+    private Item item;
+    private Integer quantity;
+    private ItemDialogListener itemDialogListener;
+    public ItemDialogFragment(ItemDialogFragment.ItemDialogListener listener, Item item) {
+        itemDialogListener = listener;
+        this.quantity = 1;
+        this.item = item;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -99,7 +93,7 @@ public class ItemDialogFragment extends DialogFragment {
                     minusButton.setEnabled(true);
                 }
                 quantityText.setText(quantity.toString());
-                totalPriceText.setText(String.format("$%.2f", item.getPrice()*quantity));
+                totalPriceText.setText(String.format("$%.2f", item.getPrice() * quantity));
             }
         });
         plusButton.setOnClickListener(new View.OnClickListener() {
@@ -112,10 +106,10 @@ public class ItemDialogFragment extends DialogFragment {
                     minusButton.setEnabled(true);
                 }
                 quantityText.setText(quantity.toString());
-                totalPriceText.setText(String.format("$%.2f", item.getPrice()*quantity));
+                totalPriceText.setText(String.format("$%.2f", item.getPrice() * quantity));
             }
         });
-        totalPriceText.setText(String.format("$%.2f", item.getPrice()*quantity));
+        totalPriceText.setText(String.format("$%.2f", item.getPrice() * quantity));
 
         addToCartButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,5 +124,9 @@ public class ItemDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);
         return builder.create();
+    }
+
+    public interface ItemDialogListener {
+        public void onDialogConfirmAdd(Item item, Integer quantity);
     }
 }

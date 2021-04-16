@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -30,16 +29,6 @@ import java.util.ArrayList;
 public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder> {
 
     private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
-
-    public interface OnItemSelectedListener {
-
-        void onItemDeleted(DocumentSnapshot item);
-
-        void onItemAdd(DocumentSnapshot item);
-        void onItemMinus(DocumentSnapshot item);
-
-    }
-
     private OnItemSelectedListener mListener;
 
     public CartItemAdapter(Query query, OnItemSelectedListener listener) {
@@ -52,7 +41,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         if (super.getItemCount() > 0) {
             ArrayList<DocumentSnapshot> list = super.mSnapshots;
             Double sum = 0.0;
-            for (DocumentSnapshot snapshot: list) {
+            for (DocumentSnapshot snapshot : list) {
                 CartItem cartItem = snapshot.toObject(CartItem.class);
                 sum += cartItem.getPrice() * cartItem.getQuantity();
             }
@@ -65,7 +54,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         if (super.getItemCount() > 0) {
             ArrayList<DocumentSnapshot> list = super.mSnapshots;
             Integer sum = 0;
-            for (DocumentSnapshot snapshot: list) {
+            for (DocumentSnapshot snapshot : list) {
                 CartItem cartItem = snapshot.toObject(CartItem.class);
                 sum += cartItem.getQuantity();
             }
@@ -78,7 +67,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         if (super.getItemCount() > 0) {
             ArrayList<DocumentSnapshot> list = super.mSnapshots;
             Double sum = 0.0;
-            for (DocumentSnapshot snapshot: list) {
+            for (DocumentSnapshot snapshot : list) {
                 CartItem cartItem = snapshot.toObject(CartItem.class);
                 sum += cartItem.getPrice() * cartItem.getQuantityInCart();
             }
@@ -91,7 +80,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         if (super.getItemCount() > 0) {
             ArrayList<DocumentSnapshot> list = super.mSnapshots;
             Integer sum = 0;
-            for (DocumentSnapshot snapshot: list) {
+            for (DocumentSnapshot snapshot : list) {
                 CartItem cartItem = snapshot.toObject(CartItem.class);
                 sum += cartItem.getQuantityInCart();
             }
@@ -114,6 +103,16 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
         viewBinderHelper.bind(holder.swipeRevealLayout, item.getId().getId());
 
         holder.bind(getSnapshot(position), mListener);
+    }
+
+    public interface OnItemSelectedListener {
+
+        void onItemDeleted(DocumentSnapshot item);
+
+        void onItemAdd(DocumentSnapshot item);
+
+        void onItemMinus(DocumentSnapshot item);
+
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -170,7 +169,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
             priceView.setText(String.format("$%.2f", item.getPrice()));
             quantityView.setText(item.getQuantity().toString());
 
-            totalPriceView.setText(String.format("$%.2f",item.getQuantity() * item.getPrice()));
+            totalPriceView.setText(String.format("$%.2f", item.getQuantity() * item.getPrice()));
             if (item.getQuantity() == 1) {
                 minusButton.setEnabled(false);
             } else {
@@ -180,7 +179,7 @@ public class CartItemAdapter extends FirestoreAdapter<CartItemAdapter.ViewHolder
             if (FirebaseUtil.getIsCurrentlyShopping()) {
                 inShopLayout.setVisibility(View.VISIBLE);
                 inShopQuantityView.setText(item.getQuantityInCart().toString());
-                inShopPriceView.setText(String.format("$%.2f",item.getQuantityInCart() * item.getPrice()));
+                inShopPriceView.setText(String.format("$%.2f", item.getQuantityInCart() * item.getPrice()));
                 totalPriceView.setTextAppearance(R.style.Theme_SMart_Subheader);
                 totalPriceView.setTypeface(null, Typeface.BOLD);
 

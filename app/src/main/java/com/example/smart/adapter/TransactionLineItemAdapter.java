@@ -6,12 +6,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smart.R;
 import com.example.smart.model.CartItem;
-import com.example.smart.model.Transaction;
 
 import java.util.List;
 
@@ -20,7 +18,7 @@ public class TransactionLineItemAdapter extends
 
     private List<CartItem> transactionLineItems;
 
-    public TransactionLineItemAdapter (List<CartItem> transactionLineItems) {
+    public TransactionLineItemAdapter(List<CartItem> transactionLineItems) {
         this.transactionLineItems = transactionLineItems;
     }
 

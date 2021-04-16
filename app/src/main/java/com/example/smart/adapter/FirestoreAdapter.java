@@ -1,7 +1,5 @@
 package com.example.smart.adapter;
 
-import android.util.Log;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentChange;
@@ -19,11 +17,9 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
         implements EventListener<QuerySnapshot> {
 
     private static final String TAG = "Firestore Adapter";
-
+    protected ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
     private Query mQuery;
     private ListenerRegistration mRegistration;
-
-    protected ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
 
     public FirestoreAdapter(Query query) {
         mQuery = query;

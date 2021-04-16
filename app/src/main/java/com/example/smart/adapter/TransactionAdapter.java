@@ -1,6 +1,5 @@
 package com.example.smart.adapter;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

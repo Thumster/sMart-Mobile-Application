@@ -1,33 +1,17 @@
 package com.example.smart.ui.home;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.fragment.app.DialogFragment;
 
 import com.example.smart.MainActivity;
 import com.example.smart.R;
@@ -36,31 +20,23 @@ import com.example.smart.util.FirebaseUtil;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProfileDialogFragment extends DialogFragment {
 
     private static final String TAG = "PROFILE_DIALOG_FRAGMENT";
-
-    public ProfileDialogFragment() {
-    }
-
     Button buttonLogout;
     RadioGroup rgShoppingHabits;
     RadioGroup rgRecommendations;
     SwitchMaterial buttonRecommendationSwitch;
+    public ProfileDialogFragment() {
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

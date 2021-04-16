@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface ApiUtilService {
-//    public String BASE_URL = "http://jianyiee.ddns.net:5000/";
+    //    public String BASE_URL = "http://jianyiee.ddns.net:5000/";
 //    public String BASE_URL = "http://192.168.1.219:5000/";
     public String BASE_URL = "http://192.168.137.1:5000/";
 

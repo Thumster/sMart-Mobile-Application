@@ -18,8 +18,6 @@ import com.chauthai.swipereveallayout.SwipeRevealLayout;
 import com.chauthai.swipereveallayout.ViewBinderHelper;
 import com.example.smart.R;
 import com.example.smart.model.Item;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
@@ -27,15 +25,6 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
 
     private static final String TAG = "ITEM_ADAPTER";
     private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
-
-    public interface OnItemSelectedListener {
-
-        void onItemSelected(DocumentSnapshot item);
-
-        void onItemAdded(DocumentSnapshot item);
-
-    }
-
     private OnItemSelectedListener mListener;
 
     public ItemAdapter(Query query, OnItemSelectedListener listener) {
@@ -63,6 +52,14 @@ public class ItemAdapter extends FirestoreAdapter<ItemAdapter.ViewHolder> {
         } catch (RuntimeException ex) {
             Log.e(TAG, "Unable to convert item to Item.class - Snapshot ID: " + snapshot.getId());
         }
+    }
+
+    public interface OnItemSelectedListener {
+
+        void onItemSelected(DocumentSnapshot item);
+
+        void onItemAdded(DocumentSnapshot item);
+
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

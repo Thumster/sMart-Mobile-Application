@@ -1,6 +1,5 @@
 package com.example.smart.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,7 @@ public class ReceiptItemAdapter extends FirestoreAdapter<ReceiptItemAdapter.View
 
     public List<CartItem> getListOfCartItems() {
         ArrayList<CartItem> cartItems = new ArrayList<>();
-        for (DocumentSnapshot snapshot: super.mSnapshots) {
+        for (DocumentSnapshot snapshot : super.mSnapshots) {
             CartItem cartItem = snapshot.toObject(CartItem.class);
             cartItems.add(cartItem);
         }
@@ -83,7 +82,7 @@ public class ReceiptItemAdapter extends FirestoreAdapter<ReceiptItemAdapter.View
         }
 
         public void bind(CartItem item) {
-            nameView.setText(String.format("%2d X %s",item.getQuantityInCart(), item.getName()));
+            nameView.setText(String.format("%2d X %s", item.getQuantityInCart(), item.getName()));
             priceView.setText(String.format("$%.2f", item.getPrice() * item.getQuantityInCart()));
         }
 

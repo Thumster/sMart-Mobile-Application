@@ -4,7 +4,6 @@
     <string name="title_items">Items</string>
     <string name="title_cart">Cart</string>
     <string name="title_transactions">Transactions</string>
-    <string name="home_button_text">Test Button</string>
     <string name="no_results">No items found</string>
     <string name="title_promo">Promotion</string>
     <string name="button_add_to_cart">Add To Cart</string>
@@ -18,16 +17,7 @@
     <string name="subtitle_qr_code">Hold your camera to scan a QR Code of a sMart basket.
          Please ensure it is an valid and unused basket.</string>
     <string name="dialog_confirm_button">Confirm</string>
-    <string name="dialog_cancel_button">Cancel</string>
 
-    <string name="title_activity_login">Login</string>
-    <string name="title_login_provider">choose a provider</string>
-    <string name="title_login_email">use email</string>
-    <string name="title_login_email_button">Continue with Email</string>
-
-    <string name="facebook_application_id" translatable="false">159501769349383</string>
     <!-- Facebook Application ID, prefixed by 'fb'. Enables Chrome Custom tabs. -->
-    <string name="facebook_login_protocol_scheme" translatable="false">fb159501769349383</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

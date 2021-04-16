@@ -1,6 +1,5 @@
 package com.example.smart.util;
 
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -37,6 +36,7 @@ public class CartUtil
 
         snapshot = null;
     }
+
     @Override
     public void onEvent(QuerySnapshot documentSnapshot,
                         FirebaseFirestoreException e) {
@@ -67,6 +67,7 @@ public class CartUtil
 
     protected void onError(FirebaseFirestoreException e) {
     }
+
     protected void onDataChanged() {
     }
 }

@@ -3,7 +3,6 @@ package com.example.smart.ui.cart;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
-
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,23 +33,16 @@ public class CheckoutDialogFragment extends DialogFragment {
 
     private Query query;
     private ReceiptItemAdapter receiptItemAdapter;
-
-    public interface CheckoutDialogListener {
-        void onCheckout(List<CartItem> cartItems);
-    }
-
     private CheckoutDialogListener checkoutDialogListener;
-
-    public CheckoutDialogFragment(CheckoutDialogListener listener, Query query) {
-        this.checkoutDialogListener = listener;
-        this.query = query;
-    }
-
     private RecyclerView checkoutRecycler;
     private ImageView closeView;
     private TextView itemsView;
     private TextView itemsPriceView;
     private Button confirmButton;
+    public CheckoutDialogFragment(CheckoutDialogListener listener, Query query) {
+        this.checkoutDialogListener = listener;
+        this.query = query;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -81,7 +72,6 @@ public class CheckoutDialogFragment extends DialogFragment {
                 cartDocRef.update(updates);
 
                 checkoutDialogListener.onCheckout(cartItems);
-
 
 
                 Toast.makeText(getContext(), "Successful Checkout", Toast.LENGTH_LONG).show();
@@ -148,6 +138,10 @@ public class CheckoutDialogFragment extends DialogFragment {
         if (receiptItemAdapter != null) {
             receiptItemAdapter.stopListening();
         }
+    }
+
+    public interface CheckoutDialogListener {
+        void onCheckout(List<CartItem> cartItems);
     }
 
 }

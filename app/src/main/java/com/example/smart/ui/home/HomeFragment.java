@@ -1,7 +1,6 @@
 package com.example.smart.ui.home;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -9,19 +8,16 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -38,7 +34,6 @@ import com.estimote.indoorsdk_module.cloud.IndoorCloudManager;
 import com.estimote.indoorsdk_module.cloud.IndoorCloudManagerFactory;
 import com.estimote.indoorsdk_module.cloud.Location;
 import com.estimote.indoorsdk_module.cloud.LocationPosition;
-import com.example.smart.MainActivity;
 import com.example.smart.R;
 import com.example.smart.model.CartItem;
 import com.example.smart.model.response.CoordsVO;
@@ -47,16 +42,12 @@ import com.example.smart.model.response.PathResponseVO;
 import com.example.smart.ui.cart.CheckoutDialogFragment;
 import com.example.smart.util.ApiUtilService;
 import com.example.smart.util.FirebaseUtil;
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -73,43 +64,28 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class HomeFragment extends Fragment
         implements FirebaseUtil.OnCartFound, QRDialogFragment.QRDialogListener {
 
-    public interface OnFragmentInteractionListener {
-        void onSelectScanBasket(QRDialogFragment.QRDialogListener listener);
-    }
-
+    private static final String TAG = "HOME_FRAGMENT";
+    private final NumberFormat DECIMAL_FORMATTER = new DecimalFormat("#0.00");
+    private final int TABLE_LENGTH = 3;
+    private final int TABLE_WIDTH = 12;
+    private final int DISTANCE_FROM_MAIN_DOOR = 8;
+    private final int DISTANCE_BETWEEN_TABLE_IN_LENGTH = 4;
+    private final int DISTANCE_BETWEEN_TABLE_IN_WIDTH = 28 - 2 * TABLE_WIDTH;
     ListenerRegistration cartsListenerRegistration;
     Query cartsQuery = FirebaseUtil.getCartsRef();
-
     ListenerRegistration itemsListenerRegistration;
     Query itemsQuery = FirebaseUtil.getUserCartItemsRef().orderBy("sortIdx", Query.Direction.ASCENDING);
     ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
     List<CartItem> validCartItems = new ArrayList<>();
     CartItem currentCartItem;
     Integer currentItemIdx = 0;
-
     OnFragmentInteractionListener listener;
-
-    private static final String TAG = "HOME_FRAGMENT";
-    private final NumberFormat DECIMAL_FORMATTER = new DecimalFormat("#0.00");
-
     ApiUtilService apiService;
-
-    private final int TABLE_LENGTH = 3;
-    private final int TABLE_WIDTH = 12;
-    private final int DISTANCE_FROM_MAIN_DOOR = 8;
-    private final int DISTANCE_BETWEEN_TABLE_IN_LENGTH = 4;
-    private final int DISTANCE_BETWEEN_TABLE_IN_WIDTH = 28 - 2 * TABLE_WIDTH;
-
-    private double pixelsPerUnitWidth;
-    private double pixelsPerUnitLength;
-
     View shoppingLayout;
     View notShoppingLayout;
-
     TextView welcomeTextView;
     TextView nameTextView;
     Button buttonQrCode;
-
     ConstraintLayout layoutItemView;
     ConstraintLayout layoutEmptyItemView;
     Button buttonRedirect;
@@ -123,23 +99,21 @@ public class HomeFragment extends Fragment
     TextView textViewItemCategory;
     TextView textViewItemPrice;
     TextView textViewItemQuantity;
-
     Location location; // The actual location, i.e., Lab
     ScanningIndoorLocationManager indoorLocationManager;
     LocationPosition currentPosition; // User's current position
-
     Paint wallPaint = new Paint(); // Stores how to draw, e.g., color, style, line thickness, text size, etc
     Paint tablePaint = new Paint();
     Paint personPaint = new Paint();
     Paint pathPaint = new Paint();
     Paint destPaint = new Paint();
-
     Rect wallRectangle = new Rect(); // Rectangle
     Rect tableRectangle = new Rect(); // Rectangle
-
     Canvas canvasIndoorMap; // Stores information on what to draw onto its associated bitmap, e.g., lines, circles, text, custom paths, etc
     ImageView imageViewIndoorMap; // Container for bitmap
     Bitmap bitmapIndoorMap; // Represents the pixels that are shown on the display
+    private double pixelsPerUnitWidth;
+    private double pixelsPerUnitLength;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -282,7 +256,7 @@ public class HomeFragment extends Fragment
 
                 Log.i(TAG, "CART CHANGE DETECTED!" +
                         "\n\tCHANGE CART ID: " + changeCartId +
-                        "\n\tCURRENT CART ID: " +  currentUserCartId +
+                        "\n\tCURRENT CART ID: " + currentUserCartId +
                         "\n\tCHANGE USER ID: " + changeUserId +
                         "\n\tCURRENT USER ID: " + currentUserId);
 
@@ -427,7 +401,7 @@ public class HomeFragment extends Fragment
     private void updateNavigationPath() {
         if (currentPosition != null) {
             int scaledCurrentX = (int) (currentPosition.getX() / 0.25);
-            int scaledCurrentY =  37 - (int) (currentPosition.getY() / 0.25);
+            int scaledCurrentY = 37 - (int) (currentPosition.getY() / 0.25);
 
             Log.i("Raw Current Position", "(" + currentPosition.getX() + ", " + currentPosition.getY() + ")");
             Log.i("Modified Current Position", "(" + scaledCurrentX + ", " + scaledCurrentY + ")");
@@ -543,7 +517,7 @@ public class HomeFragment extends Fragment
                         location,
                         new EstimoteCloudCredentials("smart-testing-gel", "f0bbad4d22be585f7880f34dad91a7e4")
                 ).withDefaultScanner()
-                 .build();
+                        .build();
 
                 indoorLocationManager.setOnPositionUpdateListener(new OnPositionUpdateListener() {
                     @Override
@@ -649,6 +623,10 @@ public class HomeFragment extends Fragment
         if (cartsListenerRegistration != null) {
             cartsListenerRegistration.remove();
         }
+    }
+
+    public interface OnFragmentInteractionListener {
+        void onSelectScanBasket(QRDialogFragment.QRDialogListener listener);
     }
 }
 

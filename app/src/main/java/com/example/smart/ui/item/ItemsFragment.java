@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.smart.MainActivity;
 import com.example.smart.R;
 import com.example.smart.adapter.ItemAdapter;
 import com.example.smart.model.CartItem;
@@ -29,8 +28,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-
-import java.io.Serializable;
 
 public class ItemsFragment extends Fragment implements
         ItemAdapter.OnItemSelectedListener, ItemDialogFragment.ItemDialogListener {
@@ -196,7 +193,7 @@ public class ItemsFragment extends Fragment implements
                             Log.i(TAG, "Successful write to firestore");
                             try {
                                 Toast.makeText(getContext(), "Successfully added to cart", Toast.LENGTH_LONG).show();
-                            } catch (Exception ex){
+                            } catch (Exception ex) {
 
                             }
                         }

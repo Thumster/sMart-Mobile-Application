@@ -15,6 +15,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+
 import com.example.smart.model.Item;
 import com.example.smart.model.RecommendationHistory;
 import com.example.smart.model.enums.Enums;
@@ -32,16 +42,6 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,9 +52,10 @@ import java.util.stream.Collectors;
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener {
 
+    public static final int MULTIPLE_PERMISSIONS = 100;
     private static final String TAG = "MAIN_ACTIVITY";
     private static final String TAG_NOTIFICATION = "MAIN_ACTIVITY_NOTIFICATION";
-
+    private static final String INTENT_ACTION_DISPLAY_ITEM = "DISPLAY_ITEM";
     public List<String> PERMISSIONS_REQUIRED = Arrays.asList(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.BLUETOOTH_ADMIN,
@@ -62,9 +63,7 @@ public class MainActivity extends AppCompatActivity
             Manifest.permission.INTERNET,
             Manifest.permission.VIBRATE
     );
-
     public BroadcastReceiver receiver;
-    private static final String INTENT_ACTION_DISPLAY_ITEM = "DISPLAY_ITEM";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,12 +141,12 @@ public class MainActivity extends AppCompatActivity
                                         if (task3.isSuccessful()) {
                                             List<DocumentSnapshot> results = task3.getResult().getDocuments();
                                             if (results.isEmpty()) {
-                                                Log.i(TAG,"NO RECOMMENDATION HISTORY FOUND: performing notification now");
+                                                Log.i(TAG, "NO RECOMMENDATION HISTORY FOUND: performing notification now");
                                                 performNotification(item, navController, intent);
                                                 RecommendationHistory recommendationHistory = new RecommendationHistory(receivedItemId, dateRecommendationReceived);
                                                 FirebaseUtil.getUserDocRef().collection(FirebaseUtil.USER_RECOMMENDATION_HISTORY_COLLECTION_NAME).add(recommendationHistory);
                                             } else {
-                                                Log.i(TAG,"RECOMMENDATION HISTORY FOUND WITHIN RANGE: SKIPPING NOTIFICATION");
+                                                Log.i(TAG, "RECOMMENDATION HISTORY FOUND WITHIN RANGE: SKIPPING NOTIFICATION");
                                             }
                                         }
                                     });
@@ -267,8 +266,6 @@ public class MainActivity extends AppCompatActivity
             notificationManager.createNotificationChannel(channel);
         }
     }
-
-    public static final int MULTIPLE_PERMISSIONS = 100;
 
     // function to check permissions
     private void checkPermissions() {
