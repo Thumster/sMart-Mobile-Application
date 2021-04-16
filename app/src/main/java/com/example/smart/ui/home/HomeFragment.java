@@ -126,10 +126,6 @@ public class HomeFragment extends Fragment
                 .build();
         apiService = retrofit.create(ApiUtilService.class);
 
-//        Integer originX = 28;
-//        Integer originY = 0;
-//        callApiInitNavigate(originX, originY);
-
         notShoppingLayout = root.findViewById(R.id.layout_not_shopping);
         shoppingLayout = root.findViewById(R.id.layout_shopping);
 
@@ -186,7 +182,7 @@ public class HomeFragment extends Fragment
             Log.i("onCreateView() Width", Double.toString(imageViewIndoorMap.getWidth()));
             Log.i("onCreateView() Height", Double.toString(imageViewIndoorMap.getHeight()));
 
-            if (shoppingLayout.getVisibility() == View.VISIBLE && !validCartItems.isEmpty()) {
+            if (shoppingLayout.getVisibility() == View.VISIBLE) {
                 setupIndoorLayout();
                 updateNavigationPath();
             }
@@ -355,7 +351,7 @@ public class HomeFragment extends Fragment
         textViewItemPrice.setText(String.format("$%.2f", currentCartItem.getPrice()));
         textViewItemQuantity.setText(String.format("%d / %d", currentCartItem.getQuantityInCart(), currentCartItem.getQuantity()));
 
-        if (!validCartItems.isEmpty() && shoppingLayout.getVisibility() == View.VISIBLE && imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
+        if (shoppingLayout.getVisibility() == View.VISIBLE && imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
             Log.i("onDataChanged()", "Entering...");
             Log.i("onDataChanged() Width", Double.toString(imageViewIndoorMap.getWidth()));
             Log.i("onDataChanged() Height", Double.toString(imageViewIndoorMap.getHeight()));
@@ -406,7 +402,11 @@ public class HomeFragment extends Fragment
             Log.i("Raw Current Position", "(" + currentPosition.getX() + ", " + currentPosition.getY() + ")");
             Log.i("Modified Current Position", "(" + scaledCurrentX + ", " + scaledCurrentY + ")");
 
-            callApiRefreshPath(scaledCurrentX, scaledCurrentY, currentCartItem.getId().getId());
+            if (validCartItems.isEmpty()) {
+                callApiRefreshPath(scaledCurrentX, scaledCurrentY, "EXIT");
+            } else {
+                callApiRefreshPath(scaledCurrentX, scaledCurrentY, currentCartItem.getId().getId());
+            }
         }
     }
 
