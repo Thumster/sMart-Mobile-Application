@@ -114,6 +114,7 @@ public class HomeFragment extends Fragment
     Bitmap bitmapIndoorMap; // Represents the pixels that are shown on the display
     private double pixelsPerUnitWidth;
     private double pixelsPerUnitLength;
+    private boolean isLocationPositionFound = false;
     private boolean isInitState = true;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -455,30 +456,32 @@ public class HomeFragment extends Fragment
                     float currentY = (float) (coords.get(0).getPosY() * pixelsPerUnitLength);
                     canvasIndoorMap.drawCircle(currentX, currentY, (float) (imageViewIndoorMap.getWidth() / 45), personPaint);
 
-                    for (int i = 1; i < coords.size() - 1; i++) {
-                        CoordsVO coord = coords.get(i);
-                        float pathX = (float) (coord.getPosX() * pixelsPerUnitWidth);
-                        float pathY = (float) (coord.getPosY() * pixelsPerUnitLength);
+                    if (isLocationPositionFound) {
+                        for (int i = 1; i < coords.size() - 1; i++) {
+                            CoordsVO coord = coords.get(i);
+                            float pathX = (float) (coord.getPosX() * pixelsPerUnitWidth);
+                            float pathY = (float) (coord.getPosY() * pixelsPerUnitLength);
 
-                        canvasIndoorMap.drawCircle(pathX, pathY, (float) (imageViewIndoorMap.getWidth() / 60), pathPaint);
+                            canvasIndoorMap.drawCircle(pathX, pathY, (float) (imageViewIndoorMap.getWidth() / 60), pathPaint);
 
-//                        Log.i("Coordinate", "(" + pathX + ", " + pathY + ")");
+    //                        Log.i("Coordinate", "(" + pathX + ", " + pathY + ")");
+                        }
+
+                        float destX = (float) (coords.get(coords.size() - 1).getPosX() * pixelsPerUnitWidth);
+                        float destY = (float) (coords.get(coords.size() - 1).getPosY() * pixelsPerUnitLength);
+
+                        Path path = new Path();
+                        path.moveTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
+                        path.lineTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
+                        path.close();
+                        canvasIndoorMap.drawPath(path, destPaint);
+
+                        path = new Path();
+                        path.moveTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
+                        path.lineTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
+                        path.close();
+                        canvasIndoorMap.drawPath(path, destPaint);
                     }
-
-                    float destX = (float) (coords.get(coords.size() - 1).getPosX() * pixelsPerUnitWidth);
-                    float destY = (float) (coords.get(coords.size() - 1).getPosY() * pixelsPerUnitLength);
-
-                    Path path = new Path();
-                    path.moveTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
-                    path.lineTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
-                    path.close();
-                    canvasIndoorMap.drawPath(path, destPaint);
-
-                    path = new Path();
-                    path.moveTo((float) (destX + pixelsPerUnitWidth / 2), (float) (destY - pixelsPerUnitLength / 2));
-                    path.lineTo((float) (destX - pixelsPerUnitWidth / 2), (float) (destY + pixelsPerUnitLength / 2));
-                    path.close();
-                    canvasIndoorMap.drawPath(path, destPaint);
 
                     imageViewIndoorMap.invalidate();
                 }
@@ -526,11 +529,13 @@ public class HomeFragment extends Fragment
                     @Override
                     public void onPositionUpdate(@NotNull LocationPosition locationPosition) {
                         currentPosition = locationPosition;
+                        isLocationPositionFound = true;
                     }
 
                     @Override
                     public void onPositionOutsideLocation() {
                         Log.i("onPositionOutsideLocation", "Out of BLE Beacon Range...");
+                        isLocationPositionFound = false;
                     }
                 });
 
