@@ -101,7 +101,7 @@ public class HomeFragment extends Fragment
     TextView textViewItemQuantity;
     Location location; // The actual location, i.e., Lab
     ScanningIndoorLocationManager indoorLocationManager;
-    LocationPosition currentPosition; // User's current position
+    LocationPosition currentPosition = new LocationPosition().copy(3.5, 4.5, 0.0); // User's current position
     Paint wallPaint = new Paint(); // Stores how to draw, e.g., color, style, line thickness, text size, etc
     Paint tablePaint = new Paint();
     Paint personPaint = new Paint();
@@ -114,11 +114,10 @@ public class HomeFragment extends Fragment
     Bitmap bitmapIndoorMap; // Represents the pixels that are shown on the display
     private double pixelsPerUnitWidth;
     private double pixelsPerUnitLength;
+    private boolean isInitState = true;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(ApiUtilService.BASE_URL)
@@ -157,6 +156,10 @@ public class HomeFragment extends Fragment
         destPaint.setStrokeWidth(10);
         destPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
+        if (indoorLocationManager == null) {
+            instantiateIndoorPositioning();
+        }
+
         nameTextView.setText(FirebaseUtil.getCurrentUser().getDisplayName());
         FirebaseUtil.startListening(this);
         onCartFound(FirebaseUtil.getCurrentUserCartId() != null);
@@ -176,18 +179,6 @@ public class HomeFragment extends Fragment
             currentItemIdx = Math.min(validCartItems.size() - 1, currentItemIdx + 1);
             onDataChanged();
         });
-
-        Handler handler = new Handler();
-        Runnable r = () -> {
-            Log.i("onCreateView() Width", Double.toString(imageViewIndoorMap.getWidth()));
-            Log.i("onCreateView() Height", Double.toString(imageViewIndoorMap.getHeight()));
-
-            if (shoppingLayout.getVisibility() == View.VISIBLE) {
-                setupIndoorLayout();
-                updateNavigationPath();
-            }
-        };
-        handler.postDelayed(r, 3000);
 
         buttonCheckout.setOnClickListener(v -> {
             if (!mSnapshots.isEmpty()) {
@@ -324,6 +315,7 @@ public class HomeFragment extends Fragment
         if (validCartItems.isEmpty()) {
             layoutEmptyItemView.setVisibility(View.VISIBLE);
             layoutItemView.setVisibility(View.INVISIBLE);
+            updateIndoorNavigationMap("onDataChanged() > !mSnapshots.isEmpty()", 1000);
             return;
         } else {
             layoutEmptyItemView.setVisibility(View.INVISIBLE);
@@ -351,13 +343,8 @@ public class HomeFragment extends Fragment
         textViewItemPrice.setText(String.format("$%.2f", currentCartItem.getPrice()));
         textViewItemQuantity.setText(String.format("%d / %d", currentCartItem.getQuantityInCart(), currentCartItem.getQuantity()));
 
-        if (shoppingLayout.getVisibility() == View.VISIBLE && imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
-            Log.i("onDataChanged()", "Entering...");
-            Log.i("onDataChanged() Width", Double.toString(imageViewIndoorMap.getWidth()));
-            Log.i("onDataChanged() Height", Double.toString(imageViewIndoorMap.getHeight()));
-
-            setupIndoorLayout();
-            updateNavigationPath();
+        if (!isInitState) {
+            updateIndoorNavigationMap("onDataChanged()", 0);
         }
     }
 
@@ -437,6 +424,8 @@ public class HomeFragment extends Fragment
                     InitNavigateResponseVO initNavigateResponseVO = response.body();
                     if (initNavigateResponseVO.getStatus() > 0) {
                         Log.i("callApiInitNavigate() RECEIVED RESULT", initNavigateResponseVO.getStatus().toString());
+                        updateIndoorNavigationMap("callApiInitNavigate()", 500);
+                        isInitState = false;
                     } else {
                         Log.e("Failed to init navigation from API. RECEIVED FAILED RESULT", initNavigateResponseVO.getStatus().toString());
                     }
@@ -473,7 +462,7 @@ public class HomeFragment extends Fragment
 
                         canvasIndoorMap.drawCircle(pathX, pathY, (float) (imageViewIndoorMap.getWidth() / 60), pathPaint);
 
-                        Log.i("Coordinate", "(" + pathX + ", " + pathY + ")");
+//                        Log.i("Coordinate", "(" + pathX + ", " + pathY + ")");
                     }
 
                     float destX = (float) (coords.get(coords.size() - 1).getPosX() * pixelsPerUnitWidth);
@@ -500,6 +489,20 @@ public class HomeFragment extends Fragment
                 Log.e(TAG, "Failed to retrieve path from API: " + t.toString());
             }
         });
+    }
+
+    private void updateIndoorNavigationMap(String tag, int delay) {
+        Handler handler = new Handler();
+        Runnable r = () -> {
+            Log.i(tag + " Width", Double.toString(imageViewIndoorMap.getWidth()));
+            Log.i(tag + " Height", Double.toString(imageViewIndoorMap.getHeight()));
+
+            if (shoppingLayout.getVisibility() == View.VISIBLE && imageViewIndoorMap.getWidth() != 0 && imageViewIndoorMap.getHeight() != 0) {
+                setupIndoorLayout();
+                updateNavigationPath();
+            }
+        };
+        handler.postDelayed(r, delay);
     }
 
     private void instantiateIndoorPositioning() {
@@ -544,7 +547,7 @@ public class HomeFragment extends Fragment
                         callApiInitNavigate(scaledOriginX, scaledOriginY);
                     }
                 };
-                handler.postDelayed(r, 1500);
+                handler.postDelayed(r, 2000);
             }
 
             @Override
@@ -561,15 +564,11 @@ public class HomeFragment extends Fragment
             shoppingLayout.setVisibility(View.VISIBLE);
             buttonQrCode.setVisibility(View.GONE);
 
-            instantiateIndoorPositioning();
+            updateIndoorNavigationMap("onCartFound()", 3500);
         } else {
             notShoppingLayout.setVisibility(View.VISIBLE);
             shoppingLayout.setVisibility(View.GONE);
             buttonQrCode.setVisibility(View.VISIBLE);
-
-            if (indoorLocationManager != null) {
-                indoorLocationManager.stopPositioning();
-            }
         }
     }
 
